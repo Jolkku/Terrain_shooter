@@ -15,7 +15,7 @@ const uuidv4 = require('uuid/v4');
 var express = require('express');
 var app = express();
 const server =  app.listen(port);
-console.log(port);
+console.log('Port is: ' + port);
 app.use(express.static('public'));
 console.log("My server is running");
 var socket = require('socket.io');
