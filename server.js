@@ -7,14 +7,14 @@ function Player(x, y, socketId) {
 }
 
 let port = process.env.PORT;
-/*if (port == null || port == "") {
+if (port == null || port == "") {
   port = 3000;
-}*/
+}
 
 const uuidv4 = require('uuid/v4');
 var express = require('express');
 var app = express();
-var server =  app.listen(port);
+const server =  app.listen(port);
 console.log(port);
 app.use(express.static('public'));
 console.log("My server is running");
