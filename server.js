@@ -7,9 +7,9 @@ function Player(x, y, socketId) {
 }
 
 let port = process.env.PORT;
-/*if (port == null || port == "") {
+if (port == null || port == "") {
   port = 3000;
-}*/
+}
 
 const uuidv4 = require('uuid/v4');
 var express = require('express');
@@ -77,6 +77,12 @@ function newConnection(socket) {
   socket.on('sendStartGame',
     function(data) {
       io.to(`${data.socketId}`).emit('startGame', data);
+    }
+  );
+
+  socket.on('sendUpdateTerrain',
+    function(data) {
+      io.to(`${data.socketId}`).emit('updateTerrain', data);
     }
   );
 
