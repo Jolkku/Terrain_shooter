@@ -1,0 +1,24 @@
+{
+  "name": "online-multiplayer",
+  "version": "1.0.0",
+  "description": "test",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "joel."
+    "heroku"
+  ],
+  "author": "Joel Rusi",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4",
+    "socket.io": "^2.1.1",
+    "uuid": "^3.3.2"
+  },
+  "engines": {
+    "node": "10.x"
+  }
+}

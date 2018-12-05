@@ -1,0 +1,229 @@
+var socket;
+var users = 0;
+var players = [];
+var bullets = [];
+var isMoving = false;
+var isMouseMoving = false;
+
+function setup() {
+  createCanvas(windowWidth, windowHeight - 5);
+  background(255);
+  socket = io.connect('http://localhost:3000');
+  socket.on('users', setUserCount);
+  socket.on('createHost',
+    function(data) {
+      players.push(new Player(data.x, data.y, data.angle, data.socketId, data.guid,));
+      checkForDuplicate(players);
+    });
+  socket.on('othersUpdatePos', function(data) {
+    //console.log("Updated others position");
+    for (var i = players.length - 1; i >= 0; i--) {
+      if (players[i].guid == data.guid) {
+        players[i].x = data.x;
+        players[i].y = data.y;
+        players[i].angle = data.angle;
+      }
+    }
+  });
+  socket.on('othersUpdateAngle', function(data) {
+    //console.log("Updated others angle");
+    for (var i = players.length - 1; i >= 0; i--) {
+      if (players[i].guid == data.guid) {
+        players[i].angle = data.angle;
+      }
+    }
+  });
+  socket.on('removePlayer',
+    function(socketId) {
+      //console.log("Removed player");
+      for (var i = players.length - 1; i >= 0; i--) {
+        if (players[i].socketId == socketId) {
+          players.splice(i, 1);
+        }
+      }
+  });
+  socket.on('createBullet',
+    function(data) {
+      bullets.push(new Bullet(data.x, data.y, data.angle, data.guid, data.socketId));
+    });
+  socket.on('sendHost',
+    function() {
+      //console.log("Sent host data");
+      console.log(uuidv4());
+      let data = {
+        x: players[0].x,
+        y: players[0].y,
+        socketId: players[0].socketId,
+        guid: players[0].guid,
+        angle: players[0].angle,
+      }
+     socket.emit('sentHost', data);
+  });
+}
+
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+function Player(x, y, angle, socketId, guid) {
+  this.dead = false;
+  this.guid = guid;
+  this.socketId = socketId;
+  this.x = x;
+  this.y = y;
+  this.angle = angle;
+  this.update = function() {
+    if (bullets.length > 0) {
+      for (var i = bullets.length - 1; i >= 0; i--) {
+        if (dist(this.x, this.y, bullets[i].x, bullets[i].y) < 20 && bullets[i].socketId != this.socketId) {
+          this.dead = true;
+          bullets[i].dead = true;
+        }
+      }
+    }
+  }
+  this.render = function() {
+    push();
+    translate(this.x, this.y);
+    rectMode(CENTER);
+    rotate(this.angle);
+    fill(255, 0, 0);
+    rect(0, 0, 25, 25);
+    pop();
+  }
+}
+
+function Bullet(x, y, angle, guid, socketId) {
+  this.socketId = socketId;
+  this.x = x;
+  this.y = y;
+  this.angle = angle;
+  this.guid = guid;
+  this.velX = Math.cos(this.angle) * 15;
+  this.velY = Math.sin(this.angle) * 15;
+  this.dead = false;
+  this.update = function() {
+    this.x += this.velX;
+    this.y += this.velY;
+    if (this.x > width || this.x < 0 || this.y > height || this.y < 0) {
+      this.dead = true;
+    }
+  }
+  this.render = function() {
+    push();
+    stroke(0);
+    strokeWeight(3);
+    point(this.x, this.y);
+    pop();
+  }
+}
+
+function checkForDuplicate(array) {
+  for ( var i = 0; i < array.length; i++){
+    for (var j = i+1; j< array.length; j++){
+      if (array[i].guid === array[j].guid){
+        players.splice(i, 1);
+      }
+    }
+  }
+}
+
+function setUserCount(send) {
+  //console.log("Setted users count");
+  users = send;
+}
+
+function draw() {
+  background(255);
+  fill(0);
+  textSize(50);
+  text(users, 10, 40);
+  if (players.length > 0) {
+    text(players[0].dead, 10, 90);
+  }
+  moving();
+  if (bullets.length > 0) {
+    for (var i = bullets.length - 1; i >= 0; i--) {
+      bullets[i].update();
+      bullets[i].render();
+      if (bullets[i].dead) {
+        bullets.splice(i, 1);
+      }
+    }
+  }
+  for (var i = players.length - 1; i >= 0; i--) {
+    players[i].update();
+    players[i].render();
+  }
+  if (isMoving) {
+    if (players.length > 0) {
+      let data = {
+        x: players[0].x,
+        y: players[0].y,
+        guid: players[0].guid,
+        angle: players[0].angle,
+      }
+      socket.emit('hostUpdatePos', data);
+    }
+  }
+  if (isMouseMoving) {
+    if (players.length > 0) {
+      let data = {
+        angle: players[0].angle,
+        guid: players[0].guid,
+      }
+      socket.emit('hostUpdateAngle', data);
+    }
+  }
+  isMoving = false;
+  isMouseMoving = false;
+}
+
+function mouseClicked() {
+  let bulletId = uuidv4();
+  bullets.push(new Bullet(players[0].x, players[0].y, players[0].angle, bulletId, players[0].socketId));
+  let data = {
+    x: players[0].x,
+    y: players[0].y,
+    angle: players[0].angle,
+    guid: bulletId,
+    socketId: players[0].socketId,
+  }
+  socket.emit('sendBullet', data);
+}
+
+
+
+function mouseMoved() {
+  if (players.length > 0) {
+    players[0].angle = Math.atan2(mouseY - players[0].y, mouseX - players[0].x);
+    isMouseMoving = true;
+  }
+}
+
+function moving() {
+  if (players.length > 0) {
+    if (keyIsDown(65)) {				//left
+      players[0].x -= 5;
+      isMoving = true;
+    }
+    if (keyIsDown(68)) {				//right
+      players[0].x += 5;
+      isMoving = true;
+    }
+    if (keyIsDown(87)) {				//up
+      players[0].y -= 5;
+      isMoving = true;
+    }
+    if (keyIsDown(83)) {				//down
+      players[0].y += 5;
+      isMoving = true;
+    }
+    if (isMoving) {
+      players[0].angle = Math.atan2(mouseY - players[0].y, mouseX - players[0].x);
+    }
+  }
+}
