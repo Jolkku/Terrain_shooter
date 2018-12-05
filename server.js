@@ -19,7 +19,7 @@ console.log('Port is: ' + port);
 app.use(express.static('public'));
 console.log("My server is running");
 var socket = require('socket.io');
-var io = socketIO(server);
+var io = socket(server);
 io.sockets.on('connection', newConnection);
 
 
