@@ -26,8 +26,8 @@ function setup() {
   background(255);
   screenWidth = windowWidth;
   screenHeight = windowHeight - 5;
-  //socket = io.connect('https://serene-beyond-68041.herokuapp.com/');
-  socket = io.connect('localHost:3000');
+  socket = io.connect('https://serene-beyond-68041.herokuapp.com/');
+  //socket = io.connect('localHost:3000');
   socket.on('users', setUserCount);
   socket.on('receivePlayersLength',
     function(data) {
