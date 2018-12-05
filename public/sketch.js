@@ -680,7 +680,7 @@ function draw() {
 }
 
 function mouseMoved() {
-  if (stage == 1 && players.length > 1) {
+  if (stage > 0 &&players.length > 1) {
     let data = {
       socketId: players[1].socketId,
       angle: players[0].angle,
