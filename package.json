@@ -8,8 +8,7 @@
     "start": "node server.js"
   },
   "keywords": [
-    "joel."
-    "heroku"
+    "joel"
   ],
   "author": "Joel Rusi",
   "license": "ISC",
