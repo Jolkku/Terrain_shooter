@@ -15,11 +15,13 @@ const uuidv4 = require('uuid/v4');
 var express = require('express');
 var app = express();
 var server =  app.listen(port);
+console.log(port);
 app.use(express.static('public'));
 console.log("My server is running");
 var socket = require('socket.io');
 var io = socket(server);
 io.sockets.on('connection', newConnection);
+
 
 
 function removeConnection(socket) {
