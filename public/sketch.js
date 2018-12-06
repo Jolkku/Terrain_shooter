@@ -8,7 +8,7 @@ var vertexes;
 var terrain = [];
 var stage = 0;
 var counter = true;
-counter4 = true;
+var counter4 = true;
 //var maxTerrainHeight = -500;    //dafault value
 //var smoothness = 0.2;   //default value
 var playerIcons = [];
