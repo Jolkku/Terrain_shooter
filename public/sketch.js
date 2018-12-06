@@ -453,6 +453,10 @@ function draw() {
   switch (stage) {
     case 0:
     if (counter) {
+      let data = {
+        socketId: players[0].socketId,
+      };
+      socket.emit('sendPlayers');
       generateTerrain(scl, windowWidth, 500, 0.1, random(0, 99));
       counter = false;
       createCanvas(windowWidth, windowHeight - 5);
