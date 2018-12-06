@@ -5,7 +5,6 @@ var particles = [];
 var users = 0;
 var scl = 50;   //default scale
 var vertexes;
-//var yoff;
 var terrain = [];
 var stage = 0;
 var counter = true;
