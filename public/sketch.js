@@ -20,6 +20,8 @@ var counter2 = true;
 var randomValue = 0;
 var terrainLoadingdone = true;
 
+/*jshint esversion: 6 */
+
 function setup() {
   createCanvas(windowWidth, windowHeight - 5);
   background(255);
@@ -97,7 +99,7 @@ function setup() {
         socketId: players[0].socketId,
         guid: players[0].guid,
         name: players[0].name,
-      }
+      };
       socket.emit('sentHost', data);
     }
   );
@@ -155,11 +157,11 @@ function Player(x, y, socketId, guid, name) {
   this.touching = false;
   this.x = x;
   this.y = y;
-  this.angle = -Math.PI/2
+  this.angle = -Math.PI/2;
   this.guid = guid;
   this.socketId = socketId;
   this.name = name;
-  this.colour;
+  this.colour = 0;
   this.velx = 0;
   this.vely = 0;
   this.render = function() {
@@ -173,7 +175,7 @@ function Player(x, y, socketId, guid, name) {
     translate(this.x, this.y);
     rect(0, 0, 6, 6);
     pop();
-  }
+  };
   this.update = function() {
     if (this.y < -20) {
       if (this.touching == false) {
@@ -187,13 +189,13 @@ function Player(x, y, socketId, guid, name) {
         this.power += 0.08;
       }
     }
-  }
+  };
   this.death = function() {
     while(counter3 < 101) {
       particles.push(new Particle(this.x, this.y, 15, true));
       counter3++;
     }
-  }
+  };
 }
 
 function PlayerIcon(x, y, name, socketId) {
@@ -218,14 +220,14 @@ function PlayerIcon(x, y, name, socketId) {
     strokeWeight(1);
     text(`Player${this.name}`, this.pos.x, this.pos.y);
     pop();
-  }
+  };
   this.update = function() {
     if (mouseX > this.pos.x - 63 && mouseX < this.pos.x + 63 && (mouseY - height) > this.pos.y - 20 && (mouseY - height) < this.pos.y + 20) {
       this.scl = 32;
     } else {
       this.scl = 30;
     }
-  }
+  };
 }
 
 function Rpg(x, y, angle, power) {
@@ -236,7 +238,7 @@ function Rpg(x, y, angle, power) {
   this.update = function() {
     this.vel.add(0, 0.2);
     this.pos.add(this.vel);
-  }
+  };
   this.render = function() {
     push();
     fill(255, 0, 0);
@@ -244,14 +246,14 @@ function Rpg(x, y, angle, power) {
     stroke(255, 0, 0);
     point(this.pos.x, this.pos.y);
     pop();
-  }
+  };
   this.blow = function() {
-    let counter = 0
+    let counter = 0;
     while(counter < 101) {
       particles.push(new Particle(this.pos.x, this.pos.y, 15, true));
       counter++;
     }
-  }
+  };
   this.chechHit = function() {
     if (dist(players[0].x, players[0].y, this.pos.x, this.pos.y) < 30) {
       players[0].dead = true;
@@ -265,7 +267,7 @@ function Rpg(x, y, angle, power) {
       players[0].score++;
       stage = 2;
     }
-  }
+  };
 }
 
 function Particle(x, y, life, vel) {
@@ -280,7 +282,7 @@ function Particle(x, y, life, vel) {
   this.update = function() {
     this.pos.add(this.vel);
     this.life -= life * 1.5;
-  }
+  };
   this.render = function() {
     push();
     fill(255);
@@ -288,7 +290,7 @@ function Particle(x, y, life, vel) {
     stroke(0, this.life);
     point(this.pos.x, this.pos.y);
     pop();
-  }
+  };
 }
 
 function generateTerrain(size, width, maxHeight, smoothness, setyoff) {
@@ -337,7 +339,7 @@ function mouseClicked() {
     for (var i = 0; i < playerIcons.length; i++) {
       if (playerIcons[i].scl == 32) {
         if (pendingPlayer == playerIcons[i].name) {
-          generateTerrain(scl, windowWidth, 500, 0.1, random(0, 9));
+          generateTerrain(scl, windowWidth, 500, 0.1, random(0, 99));
           stage = 1;
           counter2 = true;
           if ((players[0].screenWidth * players[0].screenHeight) < (players[1].screenWidth * players[1].screenHeight) || (players[0].screenWidth * players[0].screenHeight) == (players[1].screenWidth * players[1].screenHeight)) {
@@ -352,7 +354,7 @@ function mouseClicked() {
             terrain: terrain,
             width: screenWidth,
             height: screenHeight,
-          }
+          };
           connectedPlayer = playerIcons[i].socketId;
           socket.emit('sendStartGame', data);
           for (var i = 1; i < players.length; i++) {
@@ -381,7 +383,7 @@ function mouseClicked() {
         angle: players[0].angle,
         power: players[0].power,
         socketId: players[1].socketId,
-      }
+      };
       socket.emit('sendRpg', data);
       players[0].shoot = false;
       players[0].power = 0;
@@ -417,12 +419,12 @@ function lol() {
     players[1].vely = 0;
     players[1].shoot = false;
     if (players[0].name == 1) {
-      generateTerrain(scl, windowWidth, 500, 0.1, random(0, 9));
+      generateTerrain(scl, windowWidth, 500, 0.1, random(0, 99));
       terrainLoadingdone = true;
       let data = {
         terrain: terrain,
         socketId: players[1].socketId,
-      }
+      };
       socket.emit('sendUpdateTerrain', data);
     }
   }, 3000);
@@ -433,7 +435,7 @@ function draw() {
   switch (stage) {
     case 0:
     if (counter) {
-      generateTerrain(scl, windowWidth, 500, 0.1, random(0, 9));
+      generateTerrain(scl, windowWidth, 500, 0.1, random(0, 99));
       counter = false;
       createCanvas(windowWidth, windowHeight - 5);
     }
@@ -688,7 +690,7 @@ function mouseMoved() {
     let data = {
       socketId: players[1].socketId,
       angle: players[0].angle,
-    }
+    };
     socket.emit('hostUpdateAngle', data);
   }
 }
@@ -720,7 +722,7 @@ function moving() {
       socketId: players[1].socketId,
       x: players[0].x,
       y: players[0].y,
-    }
+    };
     socket.emit('hostUpdatePos', data);
   }
   if (keyIsDown(68)) {				//right
@@ -741,7 +743,7 @@ function moving() {
       socketId: players[1].socketId,
       x: players[0].x,
       y: players[0].y,
-    }
+    };
     socket.emit('hostUpdatePos', data);
   }
   if (keyIsDown(32)) {				//jump
