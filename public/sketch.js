@@ -3,7 +3,7 @@ var players = [];
 var rpgs = [];
 var particles = [];
 var users = 0;
-var scl = 25;   //default scale
+var scl = 10;   //default scale
 var vertexes;
 var terrain = [];
 var stage = 0;
@@ -337,7 +337,7 @@ function mouseClicked() {
     for (var i = 0; i < playerIcons.length; i++) {
       if (playerIcons[i].scl == 32) {
         if (pendingPlayer == playerIcons[i].name) {
-          generateTerrain(50, windowWidth, 500, 0.2, random(0, 9));
+          generateTerrain(scl, windowWidth, 500, 0.2, random(0, 9));
           stage = 1;
           counter2 = true;
           if ((players[0].screenWidth * players[0].screenHeight) < (players[1].screenWidth * players[1].screenHeight) || (players[0].screenWidth * players[0].screenHeight) == (players[1].screenWidth * players[1].screenHeight)) {
@@ -417,7 +417,7 @@ function lol() {
     players[1].vely = 0;
     players[1].shoot = false;
     if (players[0].name == 1) {
-      generateTerrain(50, windowWidth, 500, 0.2, random(0, 9));
+      generateTerrain(scl, windowWidth, 500, 0.2, random(0, 9));
       terrainLoadingdone = true;
       let data = {
         terrain: terrain,
@@ -433,7 +433,7 @@ function draw() {
   switch (stage) {
     case 0:
     if (counter) {
-      generateTerrain(50, windowWidth, 500, 0.2, random(0, 9));
+      generateTerrain(scl, windowWidth, 500, 0.2, random(0, 9));
       counter = false;
       createCanvas(windowWidth, windowHeight - 5);
     }
