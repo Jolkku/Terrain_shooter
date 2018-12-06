@@ -564,8 +564,10 @@ function draw() {
           }
         }
       }
-    players[0].touching = false;
-    players[1].touching = false;
+      if (players.length > 1) {
+        players[0].touching = false;
+        players[1].touching = false;
+      }
 
     push();
     noStroke();
@@ -656,8 +658,11 @@ function draw() {
           }
         }
       }
-    players[0].touching = false;
-    players[1].touching = false;
+
+    if (players.length > 1) {
+      players[0].touching = false;
+      players[1].touching = false;
+    }
 
     push();
     noStroke();
