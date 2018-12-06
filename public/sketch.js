@@ -131,6 +131,7 @@ function setup() {
 
   socket.on('startGame',
     function(data) {
+      console.log("startedGame");
       createCanvas(data.width, data.height);
       screenWidth = data.width;
       screenHeight = data.height;
