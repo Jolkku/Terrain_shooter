@@ -337,7 +337,7 @@ function mouseClicked() {
     for (var i = 0; i < playerIcons.length; i++) {
       if (playerIcons[i].scl == 32) {
         if (pendingPlayer == playerIcons[i].name) {
-          generateTerrain(scl, windowWidth, 500, 0.2, random(0, 9));
+          generateTerrain(scl, windowWidth, 500, 0.1, random(0, 9));
           stage = 1;
           counter2 = true;
           if ((players[0].screenWidth * players[0].screenHeight) < (players[1].screenWidth * players[1].screenHeight) || (players[0].screenWidth * players[0].screenHeight) == (players[1].screenWidth * players[1].screenHeight)) {
@@ -417,7 +417,7 @@ function lol() {
     players[1].vely = 0;
     players[1].shoot = false;
     if (players[0].name == 1) {
-      generateTerrain(scl, windowWidth, 500, 0.2, random(0, 9));
+      generateTerrain(scl, windowWidth, 500, 0.1, random(0, 9));
       terrainLoadingdone = true;
       let data = {
         terrain: terrain,
@@ -433,7 +433,7 @@ function draw() {
   switch (stage) {
     case 0:
     if (counter) {
-      generateTerrain(scl, windowWidth, 500, 0.2, random(0, 9));
+      generateTerrain(scl, windowWidth, 500, 0.1, random(0, 9));
       counter = false;
       createCanvas(windowWidth, windowHeight - 5);
     }
@@ -442,12 +442,12 @@ function draw() {
     stroke(69, 150, 0);
     beginShape();
     for (var x = 0; x <= vertexes; x++) {
-      noFill();
+      //noFill();
       vertex(width/vertexes * x, terrain[x]);
       fill(69, 139, 0);
-      ellipse(((width / vertexes) * x), terrain[x], 5);
-      noFill();
-      text(`${round(((width / vertexes) * x))}, ${round(terrain[x])}`, ((width / vertexes) * x), terrain[x] - 5);
+      //ellipse(((width / vertexes) * x), terrain[x], 5);
+      //noFill();
+      //text(`${round(((width / vertexes) * x))}, ${round(terrain[x])}`, ((width / vertexes) * x), terrain[x] - 5);
     }
     vertex(width, 0);
     vertex(0, 0);
@@ -510,12 +510,12 @@ function draw() {
     }
     beginShape();
     for (var x = 0; x <= vertexes; x++) {
-      noFill();
+      //noFill();
       vertex(screenWidth/vertexes * x, terrain[x]);
       fill(69, 139, 0);
-      ellipse(((width / vertexes) * x), terrain[x], 5);
-      noFill();
-      text(`${round(((width / vertexes) * x))}, ${round(terrain[x])}`, ((width / vertexes) * x), terrain[x] - 5);
+      //ellipse(((width / vertexes) * x), terrain[x], 5);
+      //noFill();
+      //text(`${round(((width / vertexes) * x))}, ${round(terrain[x])}`, ((width / vertexes) * x), terrain[x] - 5);
     }
     vertex(screenWidth, 0);
     vertex(0, 0);
