@@ -3,7 +3,7 @@ var players = [];
 var rpgs = [];
 var particles = [];
 var users = 0;
-var scl = 10;   //default scale
+var scl = 1;   //default scale
 var vertexes;
 var terrain = [];
 var stage = 0;
