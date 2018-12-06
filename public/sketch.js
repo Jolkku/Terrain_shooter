@@ -38,6 +38,7 @@ function setup() {
 
   socket.on('createPlayer',
     function(data) {
+      console.log("created player");
       players.push(new Player(data.x, data.y, data.socketId, data.guid, data.name));
       checkForDuplicate(players);
       if (players.length > 1) {
