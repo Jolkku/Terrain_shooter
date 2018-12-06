@@ -73,8 +73,10 @@ function setup() {
   socket.on('removePlayer',
     function(socketId) {
       //console.log("Removed player");
-      stage = 0;
-      counter = true;
+      if (socketId == players[1].socketId) {
+        stage = 0;
+        counter = true;
+      }
       for (var i = players.length - 1; i >= 0; i--) {
         if (players[i].socketId == socketId) {
           players.splice(i, 1);
