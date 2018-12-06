@@ -442,12 +442,12 @@ function draw() {
     stroke(69, 150, 0);
     beginShape();
     for (var x = 0; x <= vertexes; x++) {
-      //noFill();
+      noFill();
       vertex(width/vertexes * x, terrain[x]);
       fill(69, 139, 0);
-      //ellipse(((width / vertexes) * x), terrain[x], 5);
-      //noFill();
-      //text(`${round(((width / vertexes) * x))}, ${round(terrain[x])}`, ((width / vertexes) * x), terrain[x] - 5);
+      ellipse(((width / vertexes) * x), terrain[x], 5);
+      noFill();
+      text(`${round(((width / vertexes) * x))}, ${round(terrain[x])}`, ((width / vertexes) * x), terrain[x] - 5);
     }
     vertex(width, 0);
     vertex(0, 0);
@@ -510,12 +510,12 @@ function draw() {
     }
     beginShape();
     for (var x = 0; x <= vertexes; x++) {
-      //noFill();
+      noFill();
       vertex(screenWidth/vertexes * x, terrain[x]);
       fill(69, 139, 0);
-      //ellipse(((width / vertexes) * x), terrain[x], 5);
-      //noFill();
-      //text(`${round(((width / vertexes) * x))}, ${round(terrain[x])}`, ((width / vertexes) * x), terrain[x] - 5);
+      ellipse(((width / vertexes) * x), terrain[x], 5);
+      noFill();
+      text(`${round(((width / vertexes) * x))}, ${round(terrain[x])}`, ((width / vertexes) * x), terrain[x] - 5);
     }
     vertex(screenWidth, 0);
     vertex(0, 0);
