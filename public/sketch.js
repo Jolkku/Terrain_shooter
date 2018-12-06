@@ -460,6 +460,7 @@ function draw() {
           socketId: players[0].socketId,
         };
         socket.emit('sendPlayers');
+        console.log("sent sendplayers");
       }
       generateTerrain(scl, windowWidth, 500, 0.1, random(0, 99));
       counter = false;
