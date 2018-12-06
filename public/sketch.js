@@ -108,6 +108,20 @@ function setup() {
     }
   );
 
+  socket.on('sendMyself',
+    function(data) {
+      let myData = {
+        to: data.socketId,
+        socketId: players[0].socketId,
+        guid: players[0].guid,
+        name: players[0].name,
+        x: 0,
+        y: 0,
+      };
+      socket.emit('sentMyself', myData);
+    }
+  );
+
   socket.on('pendingConnection',
     function(data) {
       console.log("Player" + data.name + ' wants to connect with you socketId:' + data.connectedPlayer);

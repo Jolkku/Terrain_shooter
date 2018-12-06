@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 var players = [];
 
 function Player(x, y, socketId) {
@@ -39,7 +41,7 @@ function newConnection(socket) {
     socketId: socket.id,
     guid: uuidv4(),
     name: players.length,
-  }
+  };
   socket.emit('createPlayer', data);
   console.log('New connection: socket.id: ' + socket.id);
   var send = Object.keys(io.sockets.connected).length;
@@ -49,6 +51,12 @@ function newConnection(socket) {
   if (players.length > 1) {
     io.emit('sendHost');
   }
+
+  socket.on('sentPlayers',
+    function(data) {
+      socket.broadcast.emit('sendMyself', data);
+    }
+  );
 
   socket.on('sentHost',
     function(data) {
@@ -77,6 +85,12 @@ function newConnection(socket) {
   socket.on('sendStartGame',
     function(data) {
       io.to(`${data.socketId}`).emit('startGame', data);
+    }
+  );
+
+  socket.on('sentMyself',
+    function(myData) {
+      io.to(`${myData.to}`).emit('createPlayer', myData);
     }
   );
 
