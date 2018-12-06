@@ -76,6 +76,8 @@ function setup() {
       if (socketId == players[1].socketId) {
         stage = 0;
         counter = true;
+        pendingPlayer = null;
+        connectedPlayer = null;
       }
       for (var i = players.length - 1; i >= 0; i--) {
         if (players[i].socketId == socketId) {
