@@ -52,7 +52,7 @@ function newConnection(socket) {
     io.emit('sendHost');
   }
 
-  socket.on('sentPlayers',
+  socket.on('sendPlayers',
     function(data) {
       socket.broadcast.emit('sendMyself', data);
     }
@@ -90,7 +90,15 @@ function newConnection(socket) {
 
   socket.on('sentMyself',
     function(myData) {
-      io.to(`${myData.to}`).emit('createPlayer', myData);
+      console.log('receivedSentmyself ' + myData);
+      let data = {
+        x: 0,
+        y: 0,
+        socketId: myData.socketId,
+        guid: myData.guid,
+        name: myData.name,
+      };
+      io.to(`${myData.to}`).emit('createPlayer', data);
     }
   );
 

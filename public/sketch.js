@@ -1,3 +1,4 @@
+/*jshint esversion: 6 */
 var socket;
 var players = [];
 var rpgs = [];
@@ -20,15 +21,15 @@ var counter2 = true;
 var randomValue = 0;
 var terrainLoadingdone = true;
 
-/*jshint esversion: 6 */
+
 
 function setup() {
   createCanvas(windowWidth, windowHeight - 5);
   background(255);
   screenWidth = windowWidth;
   screenHeight = windowHeight - 5;
-  socket = io.connect('https://sheltered-plateau-92653.herokuapp.com/');
-  //socket = io.connect('localHost:3000');
+  //socket = io.connect('https://sheltered-plateau-92653.herokuapp.com/');
+  socket = io.connect('localHost:3000');
   socket.on('users', setUserCount);
   socket.on('receivePlayersLength',
     function(data) {
@@ -111,6 +112,8 @@ function setup() {
 
   socket.on('sendMyself',
     function(data) {
+      console.log(data);
+      console.log("send myself");
       let myData = {
         to: data.socketId,
         socketId: players[0].socketId,
@@ -170,7 +173,7 @@ function setup() {
 function Player(x, y, socketId, guid, name) {
   this.dead = false;
   this.screenWidth = windowWidth;
-  this.screenHeight = windowHeight;
+  this.screenHeight = windowHeight - 5;
   this.score = 0;
   this.shoot = false;
   this.power = 0;
@@ -359,7 +362,7 @@ function mouseClicked() {
     for (var i = 0; i < playerIcons.length; i++) {
       if (playerIcons[i].scl == 32) {
         if (pendingPlayer == playerIcons[i].name) {
-          generateTerrain(scl, windowWidth, 500, 0.1, random(0, 99));
+          generateTerrain(scl, windowWidth, 500, 0.15, random(0, 99));
           stage = 1;
           counter2 = true;
           if ((players[0].screenWidth * players[0].screenHeight) < (players[1].screenWidth * players[1].screenHeight) || (players[0].screenWidth * players[0].screenHeight) == (players[1].screenWidth * players[1].screenHeight)) {
@@ -439,7 +442,7 @@ function lol() {
     players[1].vely = 0;
     players[1].shoot = false;
     if (players[0].name == 1) {
-      generateTerrain(scl, windowWidth, 500, 0.1, random(0, 99));
+      generateTerrain(scl, windowWidth, 500, 0.15, random(0, 99));
       terrainLoadingdone = true;
       let data = {
         terrain: terrain,
@@ -459,10 +462,10 @@ function draw() {
         let data = {
           socketId: players[0].socketId,
         };
-        socket.emit('sendPlayers');
+        socket.emit('sendPlayers', data);
         console.log("sent sendplayers");
       }
-      generateTerrain(scl, windowWidth, 500, 0.1, random(0, 99));
+      generateTerrain(scl, windowWidth, 500, 0.15, random(0, 99));
       counter = false;
       createCanvas(windowWidth, windowHeight - 5);
     }
