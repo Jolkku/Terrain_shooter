@@ -56,7 +56,7 @@ function setup() {
 
   socket.on('updateOtherPlayersScreenSize',
     function(data) {
-      for (var i = players.length - 1; i >= 0; i--) {
+      for (let i = players.length - 1; i >= 0; i--) {
         if (players[i].socketId == data.socketId) {
           players[i].screenWidth = data.width;
           players[i].screenHeight = data.height;
@@ -81,14 +81,14 @@ function setup() {
         pendingPlayer = null;
         connectedPlayer = null;
       }
-      for (var i = players.length - 1; i >= 0; i--) {
+      for (let i = players.length - 1; i >= 0; i--) {
         if (players[i].socketId == socketId) {
           players.splice(i, 1);
           players[0].name = players.length;
         }
       }
 
-      for (var x = playerIcons.length - 1; x >= 0; x--) {
+      for (let x = playerIcons.length - 1; x >= 0; x--) {
         if (playerIcons[x].socketId == socketId) {
           playerIcons.splice(x, 1);
         }
@@ -140,7 +140,7 @@ function setup() {
       screenWidth = data.width;
       screenHeight = data.height;
       terrain = data.terrain;
-      for (var i = 1; i < players.length; i++) {
+      for (let i = 1; i < players.length; i++) {
         if (players[i].socketId != connectedPlayer) {
           players.splice(i, 1);
         }
@@ -320,15 +320,15 @@ function generateTerrain(size, width, maxHeight, smoothness, setyoff) {
   terrain = [];
   vertexes = round(width/size);
   yoff = setyoff;
-  for (var x = 0; x <= vertexes; x++) {
+  for (let x = 0; x <= vertexes; x++) {
     terrain[x] = map(noise(yoff), 0, 1, 0, -maxHeight);
     yoff += smoothness;
   }
 }
 
 function checkForDuplicate(array) {
-  for ( var i = 0; i < array.length; i++){
-    for (var j = i+1; j< array.length; j++){
+  for ( let i = 0; i < array.length; i++){
+    for (let j = i+1; j< array.length; j++){
       if (array[i].guid === array[j].guid){
         players.splice(i, 1);
       }
@@ -359,7 +359,7 @@ function uuidv4() {
 function mouseClicked() {
   if (stage == 0) {
     counter3 = 0;
-    for (var i = 0; i < playerIcons.length; i++) {
+    for (let i = 0; i < playerIcons.length; i++) {
       if (playerIcons[i].scl == 32) {
         if (pendingPlayer == playerIcons[i].name) {
           generateTerrain(scl, windowWidth, 500, 0.15, random(0, 99));
@@ -379,8 +379,9 @@ function mouseClicked() {
             height: screenHeight,
           };
           connectedPlayer = playerIcons[i].socketId;
+          console.log(connectedPlayer);
           socket.emit('sendStartGame', data);
-          for (var i = 1; i < players.length; i++) {
+          for (let i = 1; i < players.length; i++) {
             if (players[i].socketId != connectedPlayer) {
               players.splice(i, 1);
             }
@@ -473,7 +474,7 @@ function draw() {
     background(135, 206, 250);
     stroke(69, 150, 0);
     beginShape();
-    for (var x = 0; x <= vertexes; x++) {
+    for (let x = 0; x <= vertexes; x++) {
       //noFill();
       vertex(width/vertexes * x, terrain[x]);
       fill(69, 139, 0);
@@ -500,7 +501,7 @@ function draw() {
     textSize(30);
 
     if (playerIcons.length > 0) {
-      for (var i = 0; i < playerIcons.length; i++) {
+      for (let i = 0; i < playerIcons.length; i++) {
         playerIcons[i].update();
         playerIcons[i].render();
       }
@@ -530,18 +531,20 @@ function draw() {
       }
     }
     translate(0, screenHeight);
+    vertexes = round(screenWidth/scl);
     background(135, 206, 250);
     stroke(69, 150, 0);
-    vertexes = round(screenWidth/scl);
-    for (k = 0; k < particles.length; k++) {
-      particles[k].update();
-      particles[k].render();
-      if (particles[k].life < 0) {
-        particles.splice(k, 1);
+    if (particles.length > 0) {
+      for (let k = 0; k < particles.length; k++) {
+        particles[k].update();
+        particles[k].render();
+        if (particles[k].life < 0) {
+          particles.splice(k, 1);
+        }
       }
     }
     beginShape();
-    for (var x = 0; x <= vertexes; x++) {
+    for (let x = 0; x <= vertexes; x++) {
       //noFill();
       vertex(screenWidth/vertexes * x, terrain[x]);
       fill(69, 139, 0);
@@ -553,14 +556,14 @@ function draw() {
     vertex(0, 0);
     endShape(CLOSE);
     if (players.length > 1) {
-      for (var x = 0; x < terrain.length; x++) {
+      for (let x = 0; x < terrain.length; x++) {
         if (touchingLine(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)) , terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x + 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x - 4, players[0].y + 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x - 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x + 4, players[0].y - 4)) {
           players[0].touching = true;
           players[0].velx = 0;
           players[0].vely = 0;
         }
       }
-      for (var x = 0; x < terrain.length; x++) {
+      for (let x = 0; x < terrain.length; x++) {
         if (touchingLine(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)) , terrain[x + 1], players[1].x - 4, players[1].y + 4, players[1].x + 4, players[1].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[1].x + 4, players[1].y + 4, players[1].x - 4, players[1].y + 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[1].x - 4, players[1].y + 4, players[1].x - 4, players[1].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[1].x + 4, players[1].y + 4, players[1].x + 4, players[1].y - 4)) {
           players[1].touching = true;
           players[1].velx = 0;
@@ -570,19 +573,20 @@ function draw() {
     }
 
     moving();
-    for (var i = 0; i < players.length; i++) {
+    for (let i = 0; i < players.length; i++) {
       players[i].update();
       players[i].render();
     }
-    for (var i = 0; i < rpgs.length; i++) {
-      rpgs[i].update();
-      rpgs[i].render();
-      if (rpgs[i].pos.y > -10) {
-        rpgs.splice(i, 1);
-        break;
-      }
-      for (var x = 0; x < terrain.length; x++) {
-        if(rpghitreg(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], rpgs[i].pos.x, rpgs[i].pos.y) > 0) {
+    if (rpgs.length > 0) {
+      for (let i = 0; i < rpgs.length; i++) {
+        rpgs[i].update();
+        rpgs[i].render();
+        if (rpgs[i].pos.y > -10) {
+          rpgs.splice(i, 1);
+          break;
+        }
+        for (let x = 0; x < terrain.length; x++) {
+          if(rpghitreg(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], rpgs[i].pos.x, rpgs[i].pos.y) > 0) {
             if (rpgs[i].pos.x > ((screenWidth / vertexes) * x) && rpgs[i].pos.x < ((screenWidth / vertexes) * (x + 1))) {
               let buffer = linecircle(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], rpgs[i].pos.x, rpgs[i].pos.y);
               rpgs[i].pos.x = buffer[0];
@@ -595,11 +599,11 @@ function draw() {
           }
         }
       }
-      if (players.length > 1) {
-        players[0].touching = false;
-        players[1].touching = false;
-      }
-
+    }
+    if (players.length > 1) {
+      players[0].touching = false;
+      players[1].touching = false;
+    }
     push();
     noStroke();
     textSize(20);
@@ -634,7 +638,7 @@ function draw() {
       }
     }
     beginShape();
-    for (var x = 0; x <= vertexes; x++) {
+    for (let x = 0; x <= vertexes; x++) {
       //noFill();
       vertex(screenWidth/vertexes * x, terrain[x]);
       fill(69, 139, 0);
@@ -646,14 +650,14 @@ function draw() {
     vertex(0, 0);
     endShape(CLOSE);
     if (players.length > 1) {
-      for (var x = 0; x < terrain.length; x++) {
+      for (let x = 0; x < terrain.length; x++) {
         if (touchingLine(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)) , terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x + 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x - 4, players[0].y + 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x - 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x + 4, players[0].y - 4)) {
           players[0].touching = true;
           players[0].velx = 0;
           players[0].vely = 0;
         }
       }
-      for (var x = 0; x < terrain.length; x++) {
+      for (let x = 0; x < terrain.length; x++) {
         if (touchingLine(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)) , terrain[x + 1], players[1].x - 4, players[1].y + 4, players[1].x + 4, players[1].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[1].x + 4, players[1].y + 4, players[1].x - 4, players[1].y + 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[1].x - 4, players[1].y + 4, players[1].x - 4, players[1].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[1].x + 4, players[1].y + 4, players[1].x + 4, players[1].y - 4)) {
           players[1].touching = true;
           players[1].velx = 0;
@@ -662,20 +666,20 @@ function draw() {
       }
     }
     moving();
-    for (var i = 0; i < players.length; i++) {
+    for (let i = 0; i < players.length; i++) {
       if (players[i].dead != true) {
         players[i].update();
         players[i].render();
       }
     }
-    for (var i = 0; i < rpgs.length; i++) {
+    for (let i = 0; i < rpgs.length; i++) {
       rpgs[i].update();
       rpgs[i].render();
       if (rpgs[i].pos.y > -10) {
         rpgs.splice(i, 1);
         break;
       }
-      for (var x = 0; x < terrain.length; x++) {
+      for (let x = 0; x < terrain.length; x++) {
         if(rpghitreg(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], rpgs[i].pos.x, rpgs[i].pos.y) > 0) {
             if (rpgs[i].pos.x > ((screenWidth / vertexes) * x) && rpgs[i].pos.x < ((screenWidth / vertexes) * (x + 1))) {
               let buffer = linecircle(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], rpgs[i].pos.x, rpgs[i].pos.y);
@@ -738,7 +742,7 @@ function moving() {
     if (players[0].touching == false && players[0].y < -20) {
       players[0].x += -1.5;
     } else {
-      for (var x = 0; x < terrain.length; x++) {
+      for (let x = 0; x < terrain.length; x++) {
         if (touchingLine(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)) , terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x + 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x - 4, players[0].y + 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x - 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x + 4, players[0].y - 4)) {
           let lol = atan2(terrain[x +1] - (terrain[x]), ((screenWidth / vertexes) * (x + 1)) - ((screenWidth / vertexes) * (x)))  * 180/Math.PI;
           let angle = (modulo(lol, 360) * Math.PI / 180);
@@ -759,7 +763,7 @@ function moving() {
     if (players[0].touching == false && players[0].y < -20) {
       players[0].x += 1.5;
     } else {
-      for (var x = 0; x < terrain.length; x++) {
+      for (let x = 0; x < terrain.length; x++) {
         if (touchingLine(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)) , terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x + 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x - 4, players[0].y + 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x - 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x + 4, players[0].y - 4)) {
           let lol = atan2(terrain[x +1] - (terrain[x]), ((screenWidth / vertexes) * (x + 1)) - ((screenWidth / vertexes) * (x)))  * 180/Math.PI;
           let angle = (modulo(lol, 360) * Math.PI / 180);
