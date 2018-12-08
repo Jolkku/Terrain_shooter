@@ -18,7 +18,6 @@ var screenWidth;
 var screenHeight;
 var connectedPlayer;
 var counter2 = true;
-var randomValue = 0;
 var terrainLoadingdone = true;
 
 
@@ -41,7 +40,8 @@ function setup() {
     function(data) {
       console.log("created player");
       players.push(new Player(data.x, data.y, data.socketId, data.guid, data.name));
-      checkForDuplicate(players);
+      checkForDuplicatePlayers(players);
+      checkForDuplicatePlayerIcons(playerIcons);
       if (players.length > 1) {
         playerIcons.push(new PlayerIcon(width/2, -height * (0.73 - ((players.length - 1) / 15)), data.name, data.socketId));
       }
@@ -137,6 +137,7 @@ function setup() {
     function(data) {
       console.log("startedGame");
       createCanvas(data.width, data.height);
+      rpgs = [];
       screenWidth = data.width;
       screenHeight = data.height;
       terrain = data.terrain;
@@ -326,11 +327,21 @@ function generateTerrain(size, width, maxHeight, smoothness, setyoff) {
   }
 }
 
-function checkForDuplicate(array) {
+function checkForDuplicatePlayers(array) {
   for ( let i = 0; i < array.length; i++){
     for (let j = i+1; j< array.length; j++){
       if (array[i].guid === array[j].guid){
         players.splice(i, 1);
+      }
+    }
+  }
+}
+
+function checkForDuplicatePlayerIcons(array) {
+  for ( let i = 0; i < array.length; i++){
+    for (let j = i+1; j< array.length; j++){
+      if (array[i].socketId === array[j].socketId){
+        playerIcons.splice(i, 1);
       }
     }
   }
@@ -362,7 +373,7 @@ function mouseClicked() {
     for (let i = 0; i < playerIcons.length; i++) {
       if (playerIcons[i].scl == 32) {
         if (pendingPlayer == playerIcons[i].name) {
-          generateTerrain(scl, windowWidth, 500, 0.15, random(0, 99));
+          generateTerrain(scl, screenWidth, 500, 0.15, random(0, 99));
           stage = 1;
           counter2 = true;
           if ((players[0].screenWidth * players[0].screenHeight) < (players[1].screenWidth * players[1].screenHeight) || (players[0].screenWidth * players[0].screenHeight) == (players[1].screenWidth * players[1].screenHeight)) {
@@ -409,6 +420,11 @@ function mouseClicked() {
         socketId: players[1].socketId,
       };
       socket.emit('sendRpg', data);
+      data = {
+        socketId: players[1].socketId,
+        angle: players[0].angle,
+      };
+      socket.emit('hostUpdateAngle', data);
       players[0].shoot = false;
       players[0].power = 0;
     } else {
@@ -425,7 +441,6 @@ function setUserCount(send) {
 function lol() {
   terrainLoadingdone = false;
   setTimeout(function() {
-    randomValue++;
     stage = 1;
     counter3 = 0;
     counter2 = true;
@@ -443,7 +458,7 @@ function lol() {
     players[1].vely = 0;
     players[1].shoot = false;
     if (players[0].name == 1) {
-      generateTerrain(scl, windowWidth, 500, 0.15, random(0, 99));
+      generateTerrain(scl, screenWidth, 500, 0.15, random(0, 99));
       terrainLoadingdone = true;
       let data = {
         terrain: terrain,
@@ -466,7 +481,7 @@ function draw() {
         socket.emit('sendPlayers', data);
         console.log("sent sendplayers");
       }
-      generateTerrain(scl, windowWidth, 500, 0.15, random(0, 99));
+      generateTerrain(scl, screenWidth, 500, 0.15, random(0, 99));
       counter = false;
       createCanvas(windowWidth, windowHeight - 5);
     }
@@ -720,7 +735,7 @@ function draw() {
 }
 
 function mouseMoved() {
-  if (stage > 0 &&players.length > 1) {
+  if (stage > 0 && players.length > 1) {
     let data = {
       socketId: players[1].socketId,
       angle: players[0].angle,
