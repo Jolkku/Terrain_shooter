@@ -27,8 +27,8 @@ function setup() {
   background(255);
   screenWidth = windowWidth;
   screenHeight = windowHeight - 5;
-  socket = io.connect('https://sheltered-plateau-92653.herokuapp.com/');
-  //socket = io.connect('localHost:3000');
+  //socket = io.connect('https://sheltered-plateau-92653.herokuapp.com/');
+  socket = io.connect('localHost:3000');
   socket.on('users', setUserCount);
   socket.on('receivePlayersLength',
     function(data) {
@@ -60,6 +60,23 @@ function setup() {
         if (players[i].socketId == data.socketId) {
           players[i].screenWidth = data.width;
           players[i].screenHeight = data.height;
+        }
+      }
+    }
+  );
+
+  socket.on('updateDeath',
+    function(data) {
+      console.log(data);
+      for (var i = 0; i < players.length; i++) {
+        if (players[i].socketId == data.socketId) {
+          players[i].x = data.x;
+          players[i].y = data.y;
+          console.log(players[i]);
+          players[i].dead = true;
+          players[i].death();
+          stage = 2;
+          console.log(players[i].name + 'name');
         }
       }
     }
@@ -160,7 +177,7 @@ function setup() {
 
   socket.on('createRpg',
     function(data) {
-      rpgs.push(new Rpg(data.x, data.y, data.angle, data.power));
+      rpgs.push(new Rpg(data.x, data.y, data.angle, data.power, data.name));
     }
   );
 
@@ -254,7 +271,8 @@ function PlayerIcon(x, y, name, socketId) {
   };
 }
 
-function Rpg(x, y, angle, power) {
+function Rpg(x, y, angle, power, name) {
+  this.name = name;
   this.power = power;
   this.angle = angle;
   this.pos = createVector(x, y);
@@ -284,12 +302,26 @@ function Rpg(x, y, angle, power) {
       players[0].death();
       players[1].score++;
       stage = 2;
+      let data = {
+        to: players[1].socketId,
+        socketId: players[0].socketId,
+        x: players[0].x,
+        y: players[0].y,
+      }
+      socket.emit('sendDeath', data);
     }
     if (dist(players[1].x, players[1].y, this.pos.x, this.pos.y) < 30) {
       players[1].dead = true;
       players[1].death();
       players[0].score++;
       stage = 2;
+      let data = {
+        to: players[1].socketId,
+        socketId: players[1].socketId,
+        x: players[1].x,
+        y: players[1].y,
+      }
+      socket.emit('sendDeath', data);
     }
   };
 }
@@ -390,7 +422,6 @@ function mouseClicked() {
             height: screenHeight,
           };
           connectedPlayer = playerIcons[i].socketId;
-          console.log(connectedPlayer);
           socket.emit('sendStartGame', data);
           for (let i = 1; i < players.length; i++) {
             if (players[i].socketId != connectedPlayer) {
@@ -411,13 +442,14 @@ function mouseClicked() {
     }
   } else if (stage == 1) {
     if (players[0].shoot) {
-      rpgs.push(new Rpg(players[0].x, players[0].y, players[0].angle, players[0].power));
+      rpgs.push(new Rpg(players[0].x, players[0].y, players[0].angle, players[0].power, players[0].name));
       let data = {
         x: players[0].x,
         y: players[0].y,
         angle: players[0].angle,
         power: players[0].power,
         socketId: players[1].socketId,
+        name: players[0].name,
       };
       socket.emit('sendRpg', data);
       data = {
@@ -607,7 +639,10 @@ function draw() {
               rpgs[i].pos.x = buffer[0];
               rpgs[i].pos.y = buffer[1];
               rpgs[i].blow();
-              rpgs[i].chechHit();
+              if (rpgs[i].name == players[0].name) {
+                console.log('ran');
+                rpgs[i].chechHit();
+              }
               rpgs.splice(i, 1);
               break;
             }
@@ -795,9 +830,9 @@ function moving() {
     };
     socket.emit('hostUpdatePos', data);
   }
-  if (keyIsDown(32)) {				//jump
+  /*if (keyIsDown(32)) {				//jump
     players[0].y += -1;
-  }
+  }*/
 }
 
 function rpghitreg(Ax, Ay, Bx, By, Cx, Cy) {

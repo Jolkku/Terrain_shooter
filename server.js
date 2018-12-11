@@ -126,6 +126,14 @@ function newConnection(socket) {
     }
   );
 
+  socket.on('sendDeath',
+    function(data) {
+      console.log('received sendDeath');
+      console.log(data);
+      io.to(`${data.to}`).emit('updateDeath', data);
+    }
+  );
+
   socket.on('receiveInvitation',
     function(data) {
       io.to(`${data.socketId}`).emit('pendingConnection', data);
