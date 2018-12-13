@@ -736,7 +736,9 @@ function draw() {
               rpgs[i].pos.x = buffer[0];
               rpgs[i].pos.y = buffer[1];
               rpgs[i].blow();
-              rpgs[i].chechHit();
+              if (rpgs[i].name == players[0].name) {
+                rpgs[i].chechHit();
+              }
               rpgs.splice(i, 1);
               break;
             }
