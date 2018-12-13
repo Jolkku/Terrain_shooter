@@ -70,6 +70,7 @@ function setup() {
       console.log(data);
       for (var i = 0; i < players.length; i++) {
         if (players[i].socketId == data.socketId) {
+          players[data.addScore].score++;
           players[i].x = data.x;
           players[i].y = data.y;
           console.log(players[i]);
@@ -305,6 +306,7 @@ function Rpg(x, y, angle, power, name) {
       let data = {
         to: players[1].socketId,
         socketId: players[0].socketId,
+        addScore: 1,
         x: players[0].x,
         y: players[0].y,
       }
@@ -318,6 +320,7 @@ function Rpg(x, y, angle, power, name) {
       let data = {
         to: players[1].socketId,
         socketId: players[1].socketId,
+        addScore: 0,
         x: players[1].x,
         y: players[1].y,
       }
