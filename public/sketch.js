@@ -659,8 +659,8 @@ function draw() {
     textSize(20);
     fill(0);
     strokeWeight(1);
-    text(`Score: ${players[0].score}`, 20, -height + 30);
-    text(`Player2 score: ${players[1].score}`, screenWidth - 180, -height + 30);
+    text(`Your Score: ${players[0].score}`, 20, -height + 30);
+    text(`Player2's score: ${players[1].score}`, screenWidth - 180, -height + 30);
     text(`Angle: ${-round(players[0].angle * (180/Math.PI))}`, 20, -height + 60);
     textSize(10);
     textAlign(CENTER);
@@ -756,8 +756,8 @@ function draw() {
     textSize(20);
     fill(0);
     strokeWeight(1);
-    text(`Score: ${players[0].score}`, 20, -height + 30);
-    text(`Player2 score: ${players[1].score}`, screenWidth - 180, -height + 30);
+    text(`Your Score: ${players[0].score}`, 20, -height + 30);
+    text(`Player2's score: ${players[1].score}`, screenWidth - 180, -height + 30);
     text(`Angle: ${-round(players[0].angle * (180/Math.PI))}`, 20, -height + 60);
     pop();
 
