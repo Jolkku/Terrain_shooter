@@ -66,7 +66,6 @@ function setup() {
 
   socket.on('updateDeath',
     function(data) {
-      console.log(data);
       for (var i = 0; i < players.length; i++) {
         if (players[i].socketId == data.socketId) {
           players[data.addScore].score++;
@@ -89,7 +88,6 @@ function setup() {
 
   socket.on('removePlayer',
     function(socketId) {
-      //console.log("Removed player");
       if (socketId == players[1].socketId) {
         stage = 0;
         counter = true;
@@ -113,7 +111,6 @@ function setup() {
 
   socket.on('sendHost',
     function() {
-      //console.log("Sent host data");
       let data = {
         x: players[0].x,
         y: players[0].y,
@@ -127,8 +124,6 @@ function setup() {
 
   socket.on('sendMyself',
     function(data) {
-      console.log(data);
-      console.log("send myself");
       let myData = {
         to: data.socketId,
         socketId: players[0].socketId,
@@ -466,7 +461,6 @@ function mouseClicked() {
 }
 
 function setUserCount(send) {
-  //console.log("Setted users count");
   users = send;
 }
 
@@ -511,7 +505,6 @@ function draw() {
           socketId: players[0].socketId,
         };
         socket.emit('sendPlayers', data);
-        console.log("sent sendplayers");
       }
       generateTerrain(scl, screenWidth, 500, 0.15, random(0, 99));
       counter = false;
@@ -640,7 +633,6 @@ function draw() {
               rpgs[i].pos.y = buffer[1];
               rpgs[i].blow();
               if (rpgs[i].name == players[0].name) {
-                console.log('ran');
                 rpgs[i].chechHit();
               }
               rpgs.splice(i, 1);
@@ -786,8 +778,6 @@ function moving() {
   push();
   translate(0, screenHeight);
   players[0].angle = Math.atan2(mouseY - players[0].y - screenHeight, mouseX - players[0].x);
-  //let buffer = Math.atan2(mouseY - players[0].y, mouseX - players[0].x);
-  //players[0].angle = (modulo(buffer, 360));
   pop();
   vertexes = round(screenWidth/scl);
   if (keyIsDown(65)) {				//left
@@ -798,7 +788,6 @@ function moving() {
         if (touchingLine(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)) , terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x + 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x - 4, players[0].y + 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x - 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x + 4, players[0].y - 4)) {
           let lol = atan2(terrain[x +1] - (terrain[x]), ((screenWidth / vertexes) * (x + 1)) - ((screenWidth / vertexes) * (x)))  * 180/Math.PI;
           let angle = (modulo(lol, 360) * Math.PI / 180);
-	        //players[0].pos.add(-Math.cos(angle) * 1, -Math.sin(angle) * 1);
           players[0].x += -Math.cos(angle) * 1;
           players[0].y += -Math.sin(angle) * 1;
         }
@@ -832,9 +821,6 @@ function moving() {
     };
     socket.emit('hostUpdatePos', data);
   }
-  /*if (keyIsDown(32)) {				//jump
-    players[0].y += -1;
-  }*/
 }
 
 function rpghitreg(Ax, Ay, Bx, By, Cx, Cy) {
