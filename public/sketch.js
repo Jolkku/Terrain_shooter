@@ -306,7 +306,7 @@ function Rpg(x, y, angle, power, name) {
       let data = {
         to: players[1].socketId,
         socketId: players[0].socketId,
-        addScore: 1,
+        addScore: 0,
         x: players[0].x,
         y: players[0].y,
       }
@@ -320,7 +320,7 @@ function Rpg(x, y, angle, power, name) {
       let data = {
         to: players[1].socketId,
         socketId: players[1].socketId,
-        addScore: 0,
+        addScore: 1,
         x: players[1].x,
         y: players[1].y,
       }
