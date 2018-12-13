@@ -1,4 +1,3 @@
-/*jshint esversion: 6 */
 var socket;
 var players = [];
 var rpgs = [];
@@ -73,11 +72,9 @@ function setup() {
           players[data.addScore].score++;
           players[i].x = data.x;
           players[i].y = data.y;
-          console.log(players[i]);
           players[i].dead = true;
           players[i].death();
           stage = 2;
-          console.log(players[i].name + 'name');
         }
       }
     }

@@ -1,5 +1,3 @@
-/*jshint esversion: 6 */
-
 var players = [];
 
 function Player(x, y, socketId) {
