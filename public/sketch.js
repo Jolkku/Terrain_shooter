@@ -410,8 +410,6 @@ function uuidv4() {
 function mouseClicked() {
   if (stage == 0) {
     counter3 = 0;
-    players[0].score = 0;
-    players[1].score = 0;
     for (let i = 0; i < playerIcons.length; i++) {
       if (playerIcons[i].scl == 32) {
         if (pendingPlayer == playerIcons[i].name) {
@@ -516,6 +514,8 @@ function draw() {
     case 0:
     if (counter) {
       if (players.length > 0) {
+        players[0].score = 0;
+        players[1].score = 0;
         let data = {
           socketId: players[0].socketId,
         };
