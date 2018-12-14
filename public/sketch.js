@@ -514,8 +514,9 @@ function draw() {
     case 0:
     if (counter) {
       if (players.length > 0) {
-        players[0].score = 0;
-        players[1].score = 0;
+        for (var i = 0; i < players.length; i++) {
+          players[i].score = 0;
+        }
         let data = {
           socketId: players[0].socketId,
         };
