@@ -217,7 +217,7 @@ function Player(x, y, socketId, guid, name) {
         this.x += this.velx;
         this.y += this.vely;
       }
-    } else {
+    } /*else {
       if (this.dead == false) {
         this.dead = true;
         this.death();
@@ -231,7 +231,7 @@ function Player(x, y, socketId, guid, name) {
           y: this.y,
         }
         socket.emit('sendDeath', data);
-      }
+      }*/
     }
     if (this.shoot) {
       if (this.power < 20) {
