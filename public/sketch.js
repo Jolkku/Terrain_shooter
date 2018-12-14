@@ -218,18 +218,20 @@ function Player(x, y, socketId, guid, name) {
         this.y += this.vely;
       }
     } else {
-      this.dead = true;
-      this.death();
-      this.score++;
-      stage = 2;
-      let data = {
-        to: players[1].socketId,
-        socketId: this.socketId,
-        addScore: this.name - 1,
-        x: this.x,
-        y: this.y,
+      if (this.dead == false) {
+        this.dead = true;
+        this.death();
+        this.score++;
+        stage = 2;
+        let data = {
+          to: players[1].socketId,
+          socketId: this.socketId,
+          addScore: this.name - 1,
+          x: this.x,
+          y: this.y,
+        }
+        socket.emit('sendDeath', data);
       }
-      socket.emit('sendDeath', data);
     }
     if (this.shoot) {
       if (this.power < 20) {
