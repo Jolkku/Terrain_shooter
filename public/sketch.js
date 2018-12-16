@@ -415,7 +415,7 @@ function mouseClicked() {
     for (let i = 0; i < playerIcons.length; i++) {
       if (playerIcons[i].scl == 32) {
         if (pendingPlayer == playerIcons[i].name) {
-          generateTerrain(scl, screenWidth, 500, 0.15, random(0, 99));
+          generateTerrain(scl, screenWidth, 500, 0.05, random(0, 99));
           stage = 1;
           counter2 = true;
           if ((players[0].screenWidth * players[0].screenHeight) < (players[1].screenWidth * players[1].screenHeight) || (players[0].screenWidth * players[0].screenHeight) == (players[1].screenWidth * players[1].screenHeight)) {
@@ -499,7 +499,7 @@ function lol() {
     players[1].vely = 0;
     players[1].shoot = false;
     if (players[0].name == 1) {
-      generateTerrain(scl, screenWidth, 500, 0.15, random(0, 99));
+      generateTerrain(scl, screenWidth, 500, 0.05, random(0, 99));
       terrainLoadingdone = true;
       let data = {
         terrain: terrain,
@@ -524,7 +524,7 @@ function draw() {
         };
         socket.emit('sendPlayers', data);
       }
-      generateTerrain(scl, screenWidth, 500, 0.15, random(0, 99));
+      generateTerrain(scl, screenWidth, 500, 0.05, random(0, 99));
       counter = false;
       createCanvas(windowWidth, windowHeight - 5);
     }
