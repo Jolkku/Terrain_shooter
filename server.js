@@ -74,11 +74,6 @@ function newConnection(socket) {
     }
   );*/
 
-  socket.on('sendPlayersLength',
-    function() {
-      socket.emit('receivePlayersLength', Object.keys(io.sockets.connected).length);
-    }
-  );
 
   socket.on('sendStartGame',
     function(data) {
