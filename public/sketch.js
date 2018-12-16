@@ -3,7 +3,7 @@ var players = [];
 var rpgs = [];
 var particles = [];
 var users = 0;
-var scl = 20;   //default scale
+var scl = 30;   //default scale
 var vertexes;
 var terrain = [];
 var stage = 0;
@@ -26,8 +26,8 @@ function setup() {
   background(255);
   screenWidth = windowWidth;
   screenHeight = windowHeight - 5;
-  socket = io.connect('https://sheltered-plateau-92653.herokuapp.com/');
-  //socket = io.connect('localHost:3000');
+  //socket = io.connect('https://sheltered-plateau-92653.herokuapp.com/');
+  socket = io.connect('localHost:3000');
   socket.on('users', setUserCount);
   socket.on('receivePlayersLength',
     function(data) {
@@ -66,6 +66,7 @@ function setup() {
 
   socket.on('updateDeath',
     function(data) {
+      console.log("updateDeath");
       for (var i = 0; i < players.length; i++) {
         if (players[i].socketId == data.socketId) {
           players[data.addScore].score++;
@@ -217,22 +218,31 @@ function Player(x, y, socketId, guid, name) {
         this.x += this.velx;
         this.y += this.vely;
       }
-    }/* else {
-      if (this.dead == false) {
+    } else {
+      console.log(this.dead + " " + stage);
+      if (this.dead == false && stage == 1 && players[0].name == this.name) {
+        console.log("ran fall");
         this.dead = true;
         this.death();
-        this.score++;
+        players[1].score++;
         stage = 2;
         let data = {
           to: players[1].socketId,
-          socketId: this.socketId,
-          addScore: this.name - 1,
-          x: this.x,
-          y: this.y,
+          socketId: players[0].socketId,
+          addScore: 0,
+          x: players[0].x,
+          y: players[0].y,
         }
         socket.emit('sendDeath', data);
+        /*if (this.name == 1) {
+          this.x = 50;
+          this.y = terrain[1] - 40;
+        } else {
+          this.x = screenWidth - 50;
+          this.y = terrain[(terrain.length - 2)] - 40;
+        }*/
       }
-    }*/
+    }
     if (this.shoot) {
       if (this.power < 20) {
         this.power += 0.08;
@@ -415,7 +425,7 @@ function mouseClicked() {
     for (let i = 0; i < playerIcons.length; i++) {
       if (playerIcons[i].scl == 32) {
         if (pendingPlayer == playerIcons[i].name) {
-          generateTerrain(scl, screenWidth, 500, 0.05, random(0, 99));
+          generateTerrain(scl, screenWidth, 500, 0.08, random(0, 99999));
           stage = 1;
           counter2 = true;
           if ((players[0].screenWidth * players[0].screenHeight) < (players[1].screenWidth * players[1].screenHeight) || (players[0].screenWidth * players[0].screenHeight) == (players[1].screenWidth * players[1].screenHeight)) {
@@ -482,6 +492,20 @@ function setUserCount(send) {
 function lol() {
   terrainLoadingdone = false;
   setTimeout(function() {
+    if (players[0].name == 1) {
+      players[0].x = 50;
+      players[0].y = terrain[1] - 40;
+    } else {
+      players[0].x = screenWidth - 50;
+      players[0].y = terrain[(terrain.length - 2)] - 40;
+    }
+    if (players[1].name == 1) {
+      players[1].x = 50;
+      players[1].y = terrain[1] - 40;
+    } else {
+      players[1].x = screenWidth - 50;
+      players[1].y = terrain[(terrain.length - 2)] - 40;
+    }
     stage = 1;
     counter3 = 0;
     counter2 = true;
@@ -499,7 +523,7 @@ function lol() {
     players[1].vely = 0;
     players[1].shoot = false;
     if (players[0].name == 1) {
-      generateTerrain(scl, screenWidth, 500, 0.05, random(0, 99));
+      generateTerrain(scl, screenWidth, 500, 0.08, random(0, 99999));
       terrainLoadingdone = true;
       let data = {
         terrain: terrain,
@@ -524,7 +548,7 @@ function draw() {
         };
         socket.emit('sendPlayers', data);
       }
-      generateTerrain(scl, screenWidth, 500, 0.05, random(0, 99));
+      generateTerrain(scl, screenWidth, 500, 0.08, random(0, 99999));
       counter = false;
       createCanvas(windowWidth, windowHeight - 5);
     }
