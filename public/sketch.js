@@ -144,7 +144,7 @@ function Player(x, y, socketId, guid, name) {
     pop();
   };
   this.update = function() {
-    if (this.y < -20) {
+    if (this.y < 0) {
       if (this.touching == false) {
         this.vely += 0.2;
         this.x += this.velx;
@@ -304,6 +304,10 @@ function generateTerrain(size, width, maxHeight, smoothness, setyoff) {
     terrain[x] = map(noise(yoff), 0, 1, 0, -maxHeight);
     yoff += smoothness;
   }
+  terrain[round(terrain.length / 2)] = 0;
+  terrain[round(terrain.length / 2) - 1] = 0;
+  terrain[round(terrain.length / 2) - 2] += 30;
+  terrain[round(terrain.length / 2) + 1] += 30;
 }
 
 function checkForDuplicatePlayers(array) {
@@ -597,7 +601,7 @@ function renderGameText() {
   text(`Angle: ${-round(players[0].angle * (180/Math.PI))}`, 20, -height + 60);
   textSize(10);
   textAlign(CENTER);
-  if (players[0].shoot) {
+  if (players[0].shoot && stage == 1) {
     text(round(players[0].power), players[0].x, players[0].y + 15);
   }
   pop();
