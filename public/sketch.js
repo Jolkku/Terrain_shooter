@@ -144,14 +144,13 @@ function Player(x, y, socketId, guid, name) {
     pop();
   };
   this.update = function() {
-    if (this.y < 0) {
+    if (this.y < -5) {
       if (this.touching == false) {
         this.vely += 0.2;
         this.x += this.velx;
         this.y += this.vely;
       }
     } else {
-      console.log(this.dead + " " + stage);
       if (this.dead == false && stage == 1 && players[0].name == this.name) {
         console.log("ran fall");
         this.dead = true;
