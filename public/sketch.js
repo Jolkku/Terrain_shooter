@@ -961,7 +961,7 @@ function reloadAirburst() {
   id = setTimeout(function() {
     airBurstFire = true;
     counter5 = true;
-  }, 5000);
+  }, 6000);
 }
 
 /*
