@@ -119,6 +119,12 @@ function newConnection(socket) {
     }
   );
 
+  socket.on('sendBlowRpg',
+    function(data) {
+      io.to(`${data.to}`).emit('blowRpg', data);
+    }
+  );
+
   socket.on('sendDeath',
     function(data) {
       console.log('received sendDeath');

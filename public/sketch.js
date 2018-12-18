@@ -2,6 +2,7 @@ var socket;
 var players = [];
 var rpgs = [];
 var particles = [];
+var airBurstParticles = [];
 var users = 0;
 var scl = 30;   //default scale
 var vertexes;
@@ -9,6 +10,7 @@ var terrain = [];
 var stage = 0;
 var counter = true;
 var counter4 = true;
+var counter5 = true;
 //var maxTerrainHeight = -500;    //dafault value
 //var smoothness = 0.2;   //default value
 var playerIcons = [];
@@ -18,8 +20,9 @@ var screenHeight;
 var connectedPlayer;
 var counter2 = true;
 var terrainLoadingdone = true;
-
-
+var weapon = 1;
+var id;
+var airBurstFire = true;
 
 function setup() {
   createCanvas(windowWidth, windowHeight - 5);
@@ -39,8 +42,9 @@ function setup() {
   socket.on('pendingConnection', function(data){pendingPlayer = data.name});
   socket.on('startGame', function(data){startGame(data)});
   socket.on('updateOtherPlayersPos', function(data) {players[1].x = data.x;players[1].y = data.y});
-  socket.on('createRpg', function(data){rpgs.push(new Rpg(data.x, data.y, data.angle, data.power, data.name))});
+  socket.on('createRpg', function(data){rpgs.push(new Rpg(data.x, data.y, data.angle, data.power, data.name, data.guid, data.type))});
   socket.on('updateOtherPlayersAngle', function(data){players[1].angle = data.angle});
+  socket.on('blowRpg', function(data){blowRpg(data)});
 }
 
 
@@ -77,6 +81,7 @@ function draw() {
     background(135, 206, 250);
     stroke(69, 150, 0);
     updateParticles();
+    updateAirBurstParticles();
     renderTerrain();
     checkTerrainCollision();
     moving();
@@ -95,6 +100,7 @@ function draw() {
     background(135, 206, 250);
     stroke(69, 150, 0);
     updateParticles();
+    updateAirBurstParticles();
     renderTerrain();
     checkTerrainCollision();
     moving();
@@ -213,7 +219,10 @@ function PlayerIcon(x, y, name, socketId) {
   };
 }
 
-function Rpg(x, y, angle, power, name) {
+function Rpg(x, y, angle, power, name, guid, type) {
+  this.type = type;
+  this.guid = guid;
+  this.dead = false;
   this.name = name;
   this.power = power;
   this.angle = angle;
@@ -224,18 +233,29 @@ function Rpg(x, y, angle, power, name) {
     this.pos.add(this.vel);
   };
   this.render = function() {
-    push();
-    fill(255, 0, 0);
-    strokeWeight(5);
-    stroke(255, 0, 0);
-    point(this.pos.x, this.pos.y);
-    pop();
+    if (this.dead == false) {
+      push();
+      fill(255, 0, 0);
+      strokeWeight(5);
+      stroke(255, 0, 0);
+      point(this.pos.x, this.pos.y);
+      pop();
+    }
   };
   this.blow = function() {
-    let counter = 0;
-    while(counter < 101) {
-      particles.push(new Particle(this.pos.x, this.pos.y, 15, true));
-      counter++;
+    switch (type) {
+      case 1:
+      let counter = 0;
+      while(counter < 101) {
+        particles.push(new Particle(this.pos.x, this.pos.y, 15, true));
+        counter++;
+      }
+        break;
+      case 2:
+        for (var i = 0; i < 100; i++) {
+          airBurstParticles.push(new AirBurstParticle(this.pos.x, this.pos.y, 35));
+        }
+        break;
     }
   };
   this.chechHit = function() {
@@ -291,6 +311,28 @@ function Particle(x, y, life, vel) {
     point(this.pos.x, this.pos.y);
     pop();
   };
+}
+
+function AirBurstParticle(x, y, life) {
+  this.life = 255;
+  this.pos = createVector(x, y);
+  this.vel = p5.Vector.random2D();
+  this.vel.mult(random(1.5, 6));
+  this.pPos = createVector(this.pos.x, this.pos.y);
+  this.update = function() {
+    this.pPos.set(this.pos);
+    this.pos.add(this.vel);
+    this.life -= life;
+  }
+  this.render = function() {
+    if (this.life > 0) {
+      push();
+      stroke(0, (this.life * 2));
+      strokeWeight(1);
+      line(this.pPos.x, this.pPos.y, this.pos.x, this.pos.y);
+      pop();
+    }
+  }
 }
 
 
@@ -391,26 +433,53 @@ function mouseClicked() {
       }
     }
   } else if (stage == 1) {
-    if (players[0].shoot) {
-      rpgs.push(new Rpg(players[0].x, players[0].y, players[0].angle, players[0].power, players[0].name));
-      let data = {
-        x: players[0].x,
-        y: players[0].y,
-        angle: players[0].angle,
-        power: players[0].power,
-        socketId: players[1].socketId,
-        name: players[0].name,
-      };
-      socket.emit('sendRpg', data);
-      data = {
-        socketId: players[1].socketId,
-        angle: players[0].angle,
-      };
-      socket.emit('hostUpdateAngle', data);
-      players[0].shoot = false;
-      players[0].power = 0;
-    } else {
-      players[0].shoot = true;
+    switch (weapon) {
+      case 1:
+        if (players[0].shoot) {
+          let guid = uuidv4();
+          rpgs.push(new Rpg(players[0].x, players[0].y, players[0].angle, players[0].power, players[0].name, guid, weapon));
+          let data = {
+            x: players[0].x,
+            y: players[0].y,
+            angle: players[0].angle,
+            power: players[0].power,
+            socketId: players[1].socketId,
+            name: players[0].name,
+            guid: guid,
+            type: weapon,
+          };
+          socket.emit('sendRpg', data);
+          data = {
+            socketId: players[1].socketId,
+            angle: players[0].angle,
+          };
+          socket.emit('hostUpdateAngle', data);
+          players[0].shoot = false;
+          players[0].power = 0;
+        } else {
+          players[0].shoot = true;
+        }
+        break;
+      case 2:
+        if (airBurstFire) {
+          airBurstFire = false;
+          console.log(airBurstFire);
+          reloadAirburst();
+          let guid = uuidv4();
+          rpgs.push(new Rpg(players[0].x, players[0].y, players[0].angle, 30, players[0].name, guid, weapon));
+          let data = {
+            x: players[0].x,
+            y: players[0].y,
+            angle: players[0].angle,
+            power: 30,
+            socketId: players[1].socketId,
+            name: players[0].name,
+            guid: guid,
+            type: weapon,
+          };
+          socket.emit('sendRpg', data);
+        }
+        break;
     }
   }
 }
@@ -431,8 +500,11 @@ function mouseMoved() {
 
 function reset() {
   terrainLoadingdone = false;
+  clearTimeout(id);
+  airBurstFire = false;
   setTimeout(function() {
     resetPlayersPos();
+    airBurstFire = true;
     stage = 1;
     counter3 = 0;
     counter2 = true;
@@ -507,6 +579,19 @@ function moving() {
       y: players[0].y,
     };
     socket.emit('hostUpdatePos', data);
+  }
+}
+
+function keyPressed() {
+  if (keyCode == 49) {
+    weapon = 1;
+    players[0].power = 0;
+    players[0].shoot = false;
+  }
+  if (keyCode == 50) {
+    weapon = 2;
+    players[0].power = 0;
+    players[0].shoot = false;
   }
 }
 
@@ -598,6 +683,7 @@ function renderGameText() {
   text(`Your Score: ${players[0].score}`, 20, -height + 30);
   text(`Player2's score: ${players[1].score}`, screenWidth - 180, -height + 30);
   text(`Angle: ${-round(players[0].angle * (180/Math.PI))}`, 20, -height + 60);
+  text(`Weapon type: ${weapon}`, 20, -height + 90);
   textSize(10);
   textAlign(CENTER);
   if (players[0].shoot && stage == 1) {
@@ -637,6 +723,18 @@ function updateParticles() {
   }
 }
 
+function updateAirBurstParticles() {
+  if (airBurstParticles.length > 0) {
+    for (let k = 0; k < airBurstParticles.length; k++) {
+      airBurstParticles[k].update();
+      airBurstParticles[k].render();
+      if (airBurstParticles[k].life < 0) {
+        airBurstParticles.splice(k, 1);
+      }
+    }
+  }
+}
+
 function updatePlayers() {
   for (let i = 0; i < players.length; i++) {
     if (players[i].dead != true) {
@@ -648,12 +746,40 @@ function updatePlayers() {
 
 function updateRpgs() {
   if (rpgs.length > 0) {
+    loop1:
     for (let i = 0; i < rpgs.length; i++) {
       rpgs[i].update();
       rpgs[i].render();
-      if (rpgs[i].pos.y > -10) {
+      if (rpgs[i].pos.y > -10 || rpgs[i].dead) {
         rpgs.splice(i, 1);
         break;
+      }
+      for (let k = 0; k < rpgs.length; k++) {
+        if (rpgs[i] != rpgs[k]) {
+          if ((dist(rpgs[i].pos.x, rpgs[i].pos.y, rpgs[k].pos.x, rpgs[k].pos.y) < 25)) {
+            rpgs[i].blow();
+            rpgs[k].blow();
+            rpgs[i].dead = true;
+            rpgs[k].dead = true;
+            let guid;
+            let guid2;
+            if (rpgs[i].name = players[1].name) {
+              guid = rpgs[i].guid;
+              guid2 = rpgs[k].guid;
+            }
+            if (rpgs[k].name = players[1].name) {
+              guid = rpgs[k].guid;
+              guid2 = rpgs[i].guid;
+            }
+            let data = {
+              to: players[1].socketId,
+              guid: guid,
+              guid2: guid2,
+            }
+            socket.emit('sendBlowRpg', data);
+            break loop1;
+          }
+        }
       }
       for (let x = 0; x < terrain.length; x++) {
         if(rpghitreg(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], rpgs[i].pos.x, rpgs[i].pos.y) > 0) {
@@ -662,7 +788,7 @@ function updateRpgs() {
             rpgs[i].pos.x = buffer[0];
             rpgs[i].pos.y = buffer[1];
             rpgs[i].blow();
-            if (rpgs[i].name == players[0].name) {
+            if (rpgs[i].name == players[0].name && weapon == 1) {
               rpgs[i].chechHit();
             }
             rpgs.splice(i, 1);
@@ -802,6 +928,30 @@ function startGame(data) {
   }
   stage = 1;
   counter2 = true;
+}
+
+function blowRpg(data) {
+  console.log('ran blow');
+  console.log(data);
+  for (var i = 0; i < rpgs.length; i++) {
+    console.log(rpgs[i].guid);
+    if (rpgs[i].guid == data.guid) {
+      rpgs[i].blow();
+      rpgs[i].dead = true;
+    }
+    if (rpgs[i].guid == data.guid2) {
+      rpgs[i].blow();
+      rpgs[i].dead = true;
+    }
+  }
+}
+
+function reloadAirburst() {
+  counter5 = false
+  id = setTimeout(function() {
+    airBurstFire = true;
+    counter5 = true;
+  }, 5000);
 }
 
 /*
