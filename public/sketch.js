@@ -763,18 +763,26 @@ function updateRpgs() {
             rpgs[k].dead = true;
             let guid;
             let guid2;
+            let x;
+            let y;
             if (rpgs[i].name = players[1].name) {
               guid = rpgs[i].guid;
               guid2 = rpgs[k].guid;
+              x = rpgs[k].pos.x;
+              y = rpgs[k].pos.y;
             }
             if (rpgs[k].name = players[1].name) {
               guid = rpgs[k].guid;
               guid2 = rpgs[i].guid;
+              x = rpgs[i].pos.x;
+              y = rpgs[i].pos.y;
             }
             let data = {
               to: players[1].socketId,
               guid: guid,
               guid2: guid2,
+              x: x,
+              y: y,
             }
             socket.emit('sendBlowRpg', data);
             break loop1;
@@ -940,6 +948,8 @@ function blowRpg(data) {
       rpgs[i].dead = true;
     }
     if (rpgs[i].guid == data.guid2) {
+      rpgs[i].pos.x = data.x;
+      rpgs[i].pos.y = data.y;
       rpgs[i].blow();
       rpgs[i].dead = true;
     }
