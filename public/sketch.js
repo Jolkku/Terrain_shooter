@@ -20,9 +20,10 @@ var screenHeight;
 var connectedPlayer;
 var counter2 = true;
 var terrainLoadingdone = true;
-var weapon = 1;
+var weapon = "cannon";
 var id;
 var airBurstFire = true;
+var rtime = 5000;
 
 function setup() {
   createCanvas(windowWidth, windowHeight - 5);
@@ -244,14 +245,14 @@ function Rpg(x, y, angle, power, name, guid, type) {
   };
   this.blow = function() {
     switch (type) {
-      case 1:
+      case "cannon":
       let counter = 0;
       while(counter < 101) {
         particles.push(new Particle(this.pos.x, this.pos.y, 15, true));
         counter++;
       }
         break;
-      case 2:
+      case "airburst":
         for (var i = 0; i < 100; i++) {
           airBurstParticles.push(new AirBurstParticle(this.pos.x, this.pos.y, 35));
         }
@@ -434,7 +435,7 @@ function mouseClicked() {
     }
   } else if (stage == 1) {
     switch (weapon) {
-      case 1:
+      case "cannon":
         if (players[0].shoot) {
           let guid = uuidv4();
           rpgs.push(new Rpg(players[0].x, players[0].y, players[0].angle, players[0].power, players[0].name, guid, weapon));
@@ -460,7 +461,7 @@ function mouseClicked() {
           players[0].shoot = true;
         }
         break;
-      case 2:
+      case "airburst":
         if (airBurstFire) {
           airBurstFire = false;
           console.log(airBurstFire);
@@ -584,12 +585,12 @@ function moving() {
 
 function keyPressed() {
   if (keyCode == 49) {
-    weapon = 1;
+    weapon = "cannon";
     players[0].power = 0;
     players[0].shoot = false;
   }
   if (keyCode == 50) {
-    weapon = 2;
+    weapon = "airburst";
     players[0].power = 0;
     players[0].shoot = false;
   }
@@ -755,7 +756,7 @@ function updateRpgs() {
       rpgs[i].update();
       rpgs[i].render();
       for (let k = 0; k < rpgs.length; k++) {
-        if (rpgs[i] != rpgs[k] && rpgs[i].type == 2) {
+        if (rpgs[i] != rpgs[k] && rpgs[i].type == "airburst") {
           if ((dist(rpgs[i].pos.x, rpgs[i].pos.y, rpgs[k].pos.x, rpgs[k].pos.y) < 25)) {
             rpgs[i].blow();
             rpgs[k].blow();
@@ -796,7 +797,7 @@ function updateRpgs() {
             rpgs[i].pos.x = buffer[0];
             rpgs[i].pos.y = buffer[1];
             rpgs[i].blow();
-            if (rpgs[i].name == players[0].name && weapon == 1) {
+            if (rpgs[i].name == players[0].name && weapon == "cannon") {
               rpgs[i].chechHit();
             }
             rpgs.splice(i, 1);
@@ -961,7 +962,7 @@ function reloadAirburst() {
   id = setTimeout(function() {
     airBurstFire = true;
     counter5 = true;
-  }, 6000);
+  }, rtime);
 }
 
 /*
