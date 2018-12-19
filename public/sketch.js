@@ -748,14 +748,14 @@ function updateRpgs() {
   if (rpgs.length > 0) {
     loop1:
     for (let i = 0; i < rpgs.length; i++) {
-      rpgs[i].update();
-      rpgs[i].render();
       if (rpgs[i].pos.y > -10 || rpgs[i].dead) {
         rpgs.splice(i, 1);
         break;
       }
+      rpgs[i].update();
+      rpgs[i].render();
       for (let k = 0; k < rpgs.length; k++) {
-        if (rpgs[i] != rpgs[k]) {
+        if (rpgs[i] != rpgs[k] && rpgs[i].type == 2) {
           if ((dist(rpgs[i].pos.x, rpgs[i].pos.y, rpgs[k].pos.x, rpgs[k].pos.y) < 25)) {
             rpgs[i].blow();
             rpgs[k].blow();
