@@ -46,6 +46,7 @@ function setup() {
   socket.on('createRpg', function(data){rpgs.push(new Rpg(data.x, data.y, data.angle, data.power, data.name, data.guid, data.type))});
   socket.on('updateOtherPlayersAngle', function(data){players[1].angle = data.angle});
   socket.on('blowRpg', function(data){blowRpg(data)});
+  socket.on('receiveRecordedData', function(data){console.log(data)});
 }
 
 
@@ -53,6 +54,8 @@ function setup() {
 function draw() {
   switch (stage) {
     case 0:
+    checkForDuplicatePlayers(players);
+    checkForDuplicatePlayerIcons(playerIcons);
     if (counter) {
       counter = false;
       if (players.length > 0) {
@@ -165,11 +168,13 @@ function Player(x, y, socketId, guid, name) {
         players[1].score++;
         stage = 2;
         let data = {
+          name: "sendDeath",
           to: players[1].socketId,
           socketId: players[0].socketId,
           addScore: 0,
           x: players[0].x,
           y: players[0].y,
+          timestamp: null,
         }
         socket.emit('sendDeath', data);
       }
@@ -266,11 +271,13 @@ function Rpg(x, y, angle, power, name, guid, type) {
       players[1].score++;
       stage = 2;
       let data = {
+        name: "sendDeath",
         to: players[1].socketId,
         socketId: players[0].socketId,
         addScore: 0,
         x: players[0].x,
         y: players[0].y,
+        timestamp: null,
       }
       socket.emit('sendDeath', data);
     }
@@ -280,11 +287,13 @@ function Rpg(x, y, angle, power, name, guid, type) {
       players[0].score++;
       stage = 2;
       let data = {
+        name: "sendDeath",
         to: players[1].socketId,
         socketId: players[1].socketId,
         addScore: 1,
         x: players[1].x,
         y: players[1].y,
+        timestamp: null,
       }
       socket.emit('sendDeath', data);
     }
@@ -440,6 +449,7 @@ function mouseClicked() {
           let guid = uuidv4();
           rpgs.push(new Rpg(players[0].x, players[0].y, players[0].angle, players[0].power, players[0].name, guid, weapon));
           let data = {
+            name: "sendRpg",
             x: players[0].x,
             y: players[0].y,
             angle: players[0].angle,
@@ -448,6 +458,7 @@ function mouseClicked() {
             name: players[0].name,
             guid: guid,
             type: weapon,
+            //timestamp: null,
           };
           socket.emit('sendRpg', data);
           data = {
@@ -464,11 +475,11 @@ function mouseClicked() {
       case "airburst":
         if (airBurstFire) {
           airBurstFire = false;
-          console.log(airBurstFire);
           reloadAirburst();
           let guid = uuidv4();
           rpgs.push(new Rpg(players[0].x, players[0].y, players[0].angle, 30, players[0].name, guid, weapon));
           let data = {
+            name: "sendRpg",
             x: players[0].x,
             y: players[0].y,
             angle: players[0].angle,
@@ -477,6 +488,7 @@ function mouseClicked() {
             name: players[0].name,
             guid: guid,
             type: weapon,
+            //timestamp: null,
           };
           socket.emit('sendRpg', data);
         }
@@ -682,7 +694,7 @@ function renderGameText() {
   fill(0);
   strokeWeight(1);
   text(`Your Score: ${players[0].score}`, 20, -height + 30);
-  text(`Player2's score: ${players[1].score}`, screenWidth - 180, -height + 30);
+  text(`Other Player's score: ${players[1].score}`, screenWidth - 180, -height + 30);
   text(`Angle: ${-round(players[0].angle * (180/Math.PI))}`, 20, -height + 60);
   text(`Weapon type: ${weapon}`, 20, -height + 90);
   textSize(10);
@@ -756,7 +768,7 @@ function updateRpgs() {
       rpgs[i].update();
       rpgs[i].render();
       for (let k = 0; k < rpgs.length; k++) {
-        if (rpgs[i] != rpgs[k] && rpgs[i].type == "airburst") {
+        if (rpgs[i] != rpgs[k] && rpgs[i].type == "airburst" && rpgs[i].dead == false && rpgs[k].dead == false) {
           if ((dist(rpgs[i].pos.x, rpgs[i].pos.y, rpgs[k].pos.x, rpgs[k].pos.y) < 25)) {
             rpgs[i].blow();
             rpgs[k].blow();
@@ -766,24 +778,26 @@ function updateRpgs() {
             let guid2;
             let x;
             let y;
-            if (rpgs[i].name = players[1].name) {
+            if (rpgs[i].name == players[1].name) {
               guid = rpgs[i].guid;
               guid2 = rpgs[k].guid;
               x = rpgs[k].pos.x;
               y = rpgs[k].pos.y;
             }
-            if (rpgs[k].name = players[1].name) {
+            if (rpgs[k].name == players[1].name) {
               guid = rpgs[k].guid;
               guid2 = rpgs[i].guid;
               x = rpgs[i].pos.x;
               y = rpgs[i].pos.y;
             }
             let data = {
+              name: "sendBlowRpg",
               to: players[1].socketId,
               guid: guid,
               guid2: guid2,
               x: x,
               y: y,
+              timestamp: null,
             }
             socket.emit('sendBlowRpg', data);
             break loop1;
@@ -861,7 +875,7 @@ function updateOtherPlayersScreenSize(data) {
 }
 
 function updateDeath(data) {
-  console.log("updateDeath");
+  //console.log("updateDeath");
   for (var i = 0; i < players.length; i++) {
     if (players[i].socketId == data.socketId) {
       players[data.addScore].score++;
@@ -889,7 +903,9 @@ function removePlayer(socketId) {
   for (let i = players.length - 1; i >= 0; i--) {
     if (players[i].socketId == socketId) {
       players.splice(i, 1);
-      players[0].name = players.length;
+      if (stage == 0 && players[0].name != 1) {
+        players[0].name = players.length;
+      }
     }
   }
 
@@ -940,15 +956,12 @@ function startGame(data) {
 }
 
 function blowRpg(data) {
-  console.log('ran blow');
-  console.log(data);
   for (var i = 0; i < rpgs.length; i++) {
-    console.log(rpgs[i].guid);
-    if (rpgs[i].guid == data.guid) {
+    if (rpgs[i].guid == data.guid && rpgs[i].dead == false) {
       rpgs[i].blow();
       rpgs[i].dead = true;
     }
-    if (rpgs[i].guid == data.guid2) {
+    if (rpgs[i].guid == data.guid2 && rpgs[i].dead == false) {
       rpgs[i].pos.x = data.x;
       rpgs[i].pos.y = data.y;
       rpgs[i].blow();

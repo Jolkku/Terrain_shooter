@@ -1,4 +1,6 @@
 var players = [];
+var recordedData = [];
+
 
 function Player(x, y, socketId) {
   this.socketId = socketId;
@@ -29,6 +31,9 @@ function removeConnection(socket) {
   var send = Object.keys(io.sockets.connected).length;
   console.log(Object.keys(io.sockets.connected).length);
   io.emit('users', send);
+  if (Object.keys(io.sockets.connected).length <= 1) {
+    recordedData = [];
+  }
 }
 
 function newConnection(socket) {
@@ -68,13 +73,6 @@ function newConnection(socket) {
     }
   );
 
-  /*socket.on('test',
-    function(data) {
-      console.log(data.test);
-    }
-  );*/
-
-
   socket.on('sendStartGame',
     function(data) {
       io.to(`${data.socketId}`).emit('startGame', data);
@@ -104,6 +102,8 @@ function newConnection(socket) {
   socket.on('hostUpdatePos',
     function(data) {
       io.to(`${data.socketId}`).emit('updateOtherPlayersPos', data);
+      //data["timestamp"] = Date.now();
+      //recordedData.push(data);
     }
   );
 
@@ -116,12 +116,16 @@ function newConnection(socket) {
   socket.on('sendRpg',
     function(data) {
       io.to(`${data.socketId}`).emit('createRpg', data);
+      //data["timestamp"] = Date.now();
+      //recordedData.push(data);
     }
   );
 
   socket.on('sendBlowRpg',
     function(data) {
       io.to(`${data.to}`).emit('blowRpg', data);
+      data["timestamp"] = Date.now();
+      recordedData.push(data);
     }
   );
 
@@ -130,12 +134,20 @@ function newConnection(socket) {
       console.log('received sendDeath');
       console.log(data);
       io.to(`${data.to}`).emit('updateDeath', data);
+      data["timestamp"] = Date.now();
+      recordedData.push(data);
     }
   );
 
   socket.on('receiveInvitation',
     function(data) {
       io.to(`${data.socketId}`).emit('pendingConnection', data);
+    }
+  );
+
+  socket.on('logRecordedData',
+    function() {
+      socket.emit('receiveRecordedData', recordedData);
     }
   );
 
