@@ -171,7 +171,7 @@ function Player(x, y, socketId, guid, name) {
           name: "sendDeath",
           to: players[1].socketId,
           socketId: players[0].socketId,
-          addScore: 0,
+          addScore: players[1].socketId,
           x: players[0].x,
           y: players[0].y,
           timestamp: null,
@@ -266,15 +266,12 @@ function Rpg(x, y, angle, power, name, guid, type) {
   };
   this.chechHit = function() {
     if (dist(players[0].x, players[0].y, this.pos.x, this.pos.y) < 30) {
-      players[0].dead = true;
-      players[0].death();
-      players[1].score++;
-      stage = 2;
       let data = {
         name: "sendDeath",
         to: players[1].socketId,
+        from: players[0].socketId,
         socketId: players[0].socketId,
-        addScore: 0,
+        addScore: players[1].socketId,
         x: players[0].x,
         y: players[0].y,
         timestamp: null,
@@ -282,15 +279,12 @@ function Rpg(x, y, angle, power, name, guid, type) {
       socket.emit('sendDeath', data);
     }
     if (dist(players[1].x, players[1].y, this.pos.x, this.pos.y) < 30) {
-      players[1].dead = true;
-      players[1].death();
-      players[0].score++;
-      stage = 2;
       let data = {
         name: "sendDeath",
         to: players[1].socketId,
+        from: players[0].socketId,
         socketId: players[1].socketId,
-        addScore: 1,
+        addScore: players[0].socketId,
         x: players[1].x,
         y: players[1].y,
         timestamp: null,
@@ -447,14 +441,15 @@ function mouseClicked() {
       case "cannon":
         if (players[0].shoot) {
           let guid = uuidv4();
-          rpgs.push(new Rpg(players[0].x, players[0].y, players[0].angle, players[0].power, players[0].name, guid, weapon));
+          //rpgs.push(new Rpg(players[0].x, players[0].y, players[0].angle, players[0].power, players[0].name, guid, weapon));
           let data = {
-            name: "sendRpg",
+            msgname: "sendRpg",
             x: players[0].x,
             y: players[0].y,
             angle: players[0].angle,
             power: players[0].power,
-            socketId: players[1].socketId,
+            client2: players[1].socketId,
+            client1: players[0].socketId,
             name: players[0].name,
             guid: guid,
             type: weapon,
@@ -477,14 +472,15 @@ function mouseClicked() {
           airBurstFire = false;
           reloadAirburst();
           let guid = uuidv4();
-          rpgs.push(new Rpg(players[0].x, players[0].y, players[0].angle, 30, players[0].name, guid, weapon));
+          //rpgs.push(new Rpg(players[0].x, players[0].y, players[0].angle, 30, players[0].name, guid, weapon));
           let data = {
-            name: "sendRpg",
+            msgname: "sendRpg",
             x: players[0].x,
             y: players[0].y,
             angle: players[0].angle,
             power: 30,
-            socketId: players[1].socketId,
+            client2: players[1].socketId,
+            client1: players[0].socketId,
             name: players[0].name,
             guid: guid,
             type: weapon,
@@ -554,7 +550,7 @@ function moving() {
   vertexes = round(screenWidth/scl);
   if (keyIsDown(65)) {				//left
     if (players[0].touching == false && players[0].y < -20) {
-      players[0].x += -1.5;
+      //players[0].x += -1.5;
     } else {
       for (let x = 0; x < terrain.length; x++) {
         if (touchingLine(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)) , terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x + 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x - 4, players[0].y + 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x - 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x + 4, players[0].y - 4)) {
@@ -574,7 +570,7 @@ function moving() {
   }
   if (keyIsDown(68)) {				//right
     if (players[0].touching == false && players[0].y < -20) {
-      players[0].x += 1.5;
+      //players[0].x += 1.5;
     } else {
       for (let x = 0; x < terrain.length; x++) {
         if (touchingLine(((screenWidth / vertexes) * x), terrain[x], ((screenWidth / vertexes) * (x + 1)) , terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x + 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x - 4, players[0].y + 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x - 4, players[0].y + 4, players[0].x - 4, players[0].y - 4) || touchingLine(((screenWidth / vertexes) * x) , terrain[x], ((screenWidth / vertexes) * (x + 1)), terrain[x + 1], players[0].x + 4, players[0].y + 4, players[0].x + 4, players[0].y - 4)) {
@@ -694,7 +690,7 @@ function renderGameText() {
   fill(0);
   strokeWeight(1);
   text(`Your Score: ${players[0].score}`, 20, -height + 30);
-  text(`Other Player's score: ${players[1].score}`, screenWidth - 180, -height + 30);
+  text(`Other Player's score: ${players[1].score}`, screenWidth - 200, -height + 30);
   text(`Angle: ${-round(players[0].angle * (180/Math.PI))}`, 20, -height + 60);
   text(`Weapon type: ${weapon}`, 20, -height + 90);
   textSize(10);
@@ -768,31 +764,20 @@ function updateRpgs() {
       rpgs[i].update();
       rpgs[i].render();
       for (let k = 0; k < rpgs.length; k++) {
-        if (rpgs[i] != rpgs[k] && rpgs[i].type == "airburst" && rpgs[i].dead == false && rpgs[k].dead == false) {
+        if (rpgs[i] != rpgs[k] && rpgs[i].name == players[0].name && rpgs[i].type == "airburst" && rpgs[i].dead == false && rpgs[k].dead == false) {
           if ((dist(rpgs[i].pos.x, rpgs[i].pos.y, rpgs[k].pos.x, rpgs[k].pos.y) < 25)) {
-            rpgs[i].blow();
+            /*rpgs[i].blow();
             rpgs[k].blow();
             rpgs[i].dead = true;
-            rpgs[k].dead = true;
-            let guid;
-            let guid2;
-            let x;
-            let y;
-            if (rpgs[i].name == players[1].name) {
-              guid = rpgs[i].guid;
-              guid2 = rpgs[k].guid;
-              x = rpgs[k].pos.x;
-              y = rpgs[k].pos.y;
-            }
-            if (rpgs[k].name == players[1].name) {
-              guid = rpgs[k].guid;
-              guid2 = rpgs[i].guid;
-              x = rpgs[i].pos.x;
-              y = rpgs[i].pos.y;
-            }
+            rpgs[k].dead = true;*/
+            let guid = rpgs[k].guid;
+            let guid2 = rpgs[i].guid;
+            let x = rpgs[i].pos.x;
+            let y = rpgs[i].pos.y;
             let data = {
-              name: "sendBlowRpg",
+              msgname: "sendBlowRpg",
               to: players[1].socketId,
+              from: players[0].socketId,
               guid: guid,
               guid2: guid2,
               x: x,
@@ -877,8 +862,10 @@ function updateOtherPlayersScreenSize(data) {
 function updateDeath(data) {
   //console.log("updateDeath");
   for (var i = 0; i < players.length; i++) {
+    if (players[i].socketId == data.addScore) {
+      players[i].score++;
+    }
     if (players[i].socketId == data.socketId) {
-      players[data.addScore].score++;
       players[i].x = data.x;
       players[i].y = data.y;
       players[i].dead = true;

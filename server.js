@@ -115,7 +115,7 @@ function newConnection(socket) {
 
   socket.on('sendRpg',
     function(data) {
-      io.to(`${data.socketId}`).emit('createRpg', data);
+      io.to(`${data.client1}`).to(`${data.client2}`).emit('createRpg', data);
       //data["timestamp"] = Date.now();
       //recordedData.push(data);
     }
@@ -123,7 +123,7 @@ function newConnection(socket) {
 
   socket.on('sendBlowRpg',
     function(data) {
-      io.to(`${data.to}`).emit('blowRpg', data);
+      io.to(`${data.to}`).to(`${data.from}`).emit('blowRpg', data);
       data["timestamp"] = Date.now();
       recordedData.push(data);
     }
@@ -131,11 +131,15 @@ function newConnection(socket) {
 
   socket.on('sendDeath',
     function(data) {
-      console.log('received sendDeath');
-      console.log(data);
-      io.to(`${data.to}`).emit('updateDeath', data);
+      io.to(`${data.to}`).to(`${data.from}`).emit('updateDeath', data);
       data["timestamp"] = Date.now();
       recordedData.push(data);
+    }
+  );
+
+  socket.on('sendFall',
+    function(data) {
+      io.to(`${data.to}`).emit('updateDeath', data);
     }
   );
 
