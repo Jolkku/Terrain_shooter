@@ -1,25 +1,23 @@
 var players = [];
-var bullets = []
+var recordedData = [];
 
-function Player(x, y, angle, socketId) {
+
+function Player(x, y, socketId) {
   this.socketId = socketId;
   this.x = x;
   this.y = y;
-  this.angle = angle;
 }
 
-function Bullet(x, y, angle, guid, socketId) {
-  this.x = x;
-  this.y = y;
-  this.angle = angle;
-  this.guid = guid;
-  this.socketId = socketId;
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
 }
 
 const uuidv4 = require('uuid/v4');
 var express = require('express');
 var app = express();
-var server =  app.listen(3000);
+const server =  app.listen(port);
+console.log('Port is: ' + port);
 app.use(express.static('public'));
 console.log("My server is running");
 var socket = require('socket.io');
@@ -27,23 +25,27 @@ var io = socket(server);
 io.sockets.on('connection', newConnection);
 
 
+
 function removeConnection(socket) {
   console.log('Client has disconnected');
-  var send = Object.keys(io.sockets.connected).length;
+  let send = Object.keys(io.sockets.connected).length;
   console.log(Object.keys(io.sockets.connected).length);
   io.emit('users', send);
+  if (Object.keys(io.sockets.connected).length <= 1) {
+    recordedData = [];
+  }
 }
 
 function newConnection(socket) {
-  players.push(new Player(250, 250, 0, socket.id));
-  let createData = {
-    x: 250,
-    y: 250,
-    angle: 0,
+  players.push(new Player(0, 0, socket.id));
+  let data = {
+    x: 0,
+    y: 0,
     socketId: socket.id,
     guid: uuidv4(),
-  }
-  socket.emit('createHost', createData);
+    name: players.length,
+  };
+  socket.emit('createPlayer', data);
   console.log('New connection: socket.id: ' + socket.id);
   var send = Object.keys(io.sockets.connected).length;
   console.log('User count: ' + Object.keys(io.sockets.connected).length);
@@ -53,26 +55,105 @@ function newConnection(socket) {
     io.emit('sendHost');
   }
 
+  socket.on('sendPlayers',
+    function(data) {
+      socket.broadcast.emit('sendMyself', data);
+    }
+  );
+
   socket.on('sentHost',
     function(data) {
-    socket.broadcast.emit('createHost', data);
-  });
+      socket.broadcast.emit('createPlayer', data);
+    }
+  );
 
-  socket.on('sendBullet',
+  socket.on('sendScreenSize',
     function(data) {
-      bullets.push(new Bullet(data.x, data.y, data.angle, data.guid, data.socketId));
-      socket.broadcast.emit('createBullet', data);
-    });
+      socket.broadcast.emit('updateOtherPlayersScreenSize', data);
+    }
+  );
+
+  socket.on('sendStartGame',
+    function(data) {
+      io.to(`${data.socketId}`).emit('startGame', data);
+    }
+  );
+
+  socket.on('sentMyself',
+    function(myData) {
+      console.log('receivedSentmyself ' + myData);
+      let data = {
+        x: 0,
+        y: 0,
+        socketId: myData.socketId,
+        guid: myData.guid,
+        name: myData.name,
+      };
+      io.to(`${myData.to}`).emit('createPlayer', data);
+    }
+  );
+
+  socket.on('sendUpdateTerrain',
+    function(data) {
+      io.to(`${data.socketId}`).emit('updateTerrain', data);
+    }
+  );
 
   socket.on('hostUpdatePos',
     function(data) {
-      socket.broadcast.emit('othersUpdatePos', data);
-    });
+      io.to(`${data.socketId}`).emit('updateOtherPlayersPos', data);
+      //data["timestamp"] = Date.now();
+      //recordedData.push(data);
+    }
+  );
 
   socket.on('hostUpdateAngle',
     function(data) {
-      socket.broadcast.emit('othersUpdateAngle', data);
-    });
+      io.to(`${data.socketId}`).emit('updateOtherPlayersAngle', data);
+    }
+  );
+
+  socket.on('sendRpg',
+    function(data) {
+      io.to(`${data.client1}`).to(`${data.client2}`).emit('createRpg', data);
+      //data["timestamp"] = Date.now();
+      //recordedData.push(data);
+    }
+  );
+
+  socket.on('sendBlowRpg',
+    function(data) {
+      io.to(`${data.to}`).to(`${data.from}`).emit('blowRpg', data);
+      data["timestamp"] = Date.now();
+      recordedData.push(data);
+    }
+  );
+
+  socket.on('sendDeath',
+    function(data) {
+      io.to(`${data.to}`).to(`${data.from}`).emit('updateDeath', data);
+      data["timestamp"] = Date.now();
+      recordedData.push(data);
+    }
+  );
+
+  socket.on('sendFall',
+    function(data) {
+      io.to(`${data.to}`).emit('updateDeath', data);
+    }
+  );
+
+  socket.on('receiveInvitation',
+    function(data) {
+      io.to(`${data.socketId}`).emit('pendingConnection', data);
+    }
+  );
+
+  socket.on('logRecordedData',
+    function() {
+      socket.emit('receiveRecordedData', recordedData);
+    }
+  );
 
   socket.on('disconnect',
     function() {
@@ -83,5 +164,6 @@ function newConnection(socket) {
         }
       }
       removeConnection();
-    });
+    }
+  );
 }

@@ -690,7 +690,7 @@ function renderGameText() {
   fill(0);
   strokeWeight(1);
   text(`Your Score: ${players[0].score}`, 20, -height + 30);
-  text(`Other Player's score: ${players[1].score}`, screenWidth - 200, -height + 30);
+  text(`Other Player's score: ${players[1].score}`, screenWidth - 220, -height + 30);
   text(`Angle: ${-round(players[0].angle * (180/Math.PI))}`, 20, -height + 60);
   text(`Weapon type: ${weapon}`, 20, -height + 90);
   textSize(10);

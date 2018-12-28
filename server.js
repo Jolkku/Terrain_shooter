@@ -28,7 +28,7 @@ io.sockets.on('connection', newConnection);
 
 function removeConnection(socket) {
   console.log('Client has disconnected');
-  var send = Object.keys(io.sockets.connected).length;
+  let send = Object.keys(io.sockets.connected).length;
   console.log(Object.keys(io.sockets.connected).length);
   io.emit('users', send);
   if (Object.keys(io.sockets.connected).length <= 1) {
@@ -102,8 +102,6 @@ function newConnection(socket) {
   socket.on('hostUpdatePos',
     function(data) {
       io.to(`${data.socketId}`).emit('updateOtherPlayersPos', data);
-      //data["timestamp"] = Date.now();
-      //recordedData.push(data);
     }
   );
 
@@ -116,8 +114,6 @@ function newConnection(socket) {
   socket.on('sendRpg',
     function(data) {
       io.to(`${data.client1}`).to(`${data.client2}`).emit('createRpg', data);
-      //data["timestamp"] = Date.now();
-      //recordedData.push(data);
     }
   );
 
@@ -131,9 +127,17 @@ function newConnection(socket) {
 
   socket.on('sendDeath',
     function(data) {
-      io.to(`${data.to}`).to(`${data.from}`).emit('updateDeath', data);
-      data["timestamp"] = Date.now();
-      recordedData.push(data);
+      if (recordedData.length > 0) {
+        let time = Date.now();
+        for (var i = 0; i < recordedData.length; i++) {
+          if (time - recordedData[i]["timestamp"] > 100) {
+            recordedData.splice(i, 1);
+          }
+        }
+      }
+      if (recordedData.length < 1) {
+        io.to(`${data.to}`).to(`${data.from}`).emit('updateDeath', data);
+      }
     }
   );
 
