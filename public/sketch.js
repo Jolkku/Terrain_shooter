@@ -381,7 +381,7 @@ function Missile(x, y, angle, name, guid) {
     }
   }
   this.chechHit = function() {
-    if (dist(players[0].x, players[0].y, this.pos.x, this.pos.y) < 30) {
+    if (dist(players[0].x, players[0].y, this.pos.x, this.pos.y) < 15) {
       let data = {
         name: "sendDeath",
         to: players[1].socketId,
@@ -394,7 +394,7 @@ function Missile(x, y, angle, name, guid) {
       }
       socket.emit('sendDeath', data);
     }
-    if (dist(players[1].x, players[1].y, this.pos.x, this.pos.y) < 30) {
+    if (dist(players[1].x, players[1].y, this.pos.x, this.pos.y) < 15) {
       let data = {
         name: "sendDeath",
         to: players[1].socketId,
