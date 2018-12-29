@@ -111,9 +111,21 @@ function newConnection(socket) {
     }
   );
 
+  socket.on('sendUpdateMissile',
+    function(data) {
+      io.to(`${data.to}`).emit('updateMissile', data);
+    }
+  );
+
   socket.on('sendRpg',
     function(data) {
       io.to(`${data.client1}`).to(`${data.client2}`).emit('createRpg', data);
+    }
+  );
+
+  socket.on('sendMissile',
+    function(data) {
+      io.to(`${data.client1}`).to(`${data.client2}`).emit('createMissile', data);
     }
   );
 
@@ -122,6 +134,14 @@ function newConnection(socket) {
       io.to(`${data.to}`).to(`${data.from}`).emit('blowRpg', data);
       data["timestamp"] = Date.now();
       recordedData.push(data);
+    }
+  );
+
+  socket.on('sendBlowMissile',
+    function(data) {
+      io.to(`${data.to}`).to(`${data.from}`).emit('blowMissile', data);
+      //data["timestamp"] = Date.now();
+      //recordedData.push(data);
     }
   );
 
