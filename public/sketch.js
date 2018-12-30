@@ -200,7 +200,7 @@ function Player(x, y, socketId, guid, name) {
   };
   this.death = function() {
     while(counter3 < 101) {
-      particles.push(new Particle(this.x, this.y, 15, true));
+      particles.push(new Particle(this.x, this.y, 15, 4));
       counter3++;
     }
   };
@@ -266,7 +266,7 @@ function Rpg(x, y, angle, power, name, guid, type) {
       case "cannon":
       let counter = 0;
       while(counter < 101) {
-        particles.push(new Particle(this.pos.x, this.pos.y, 15, true));
+        particles.push(new Particle(this.pos.x, this.pos.y, 15, 4));
         counter++;
       }
         break;
@@ -309,12 +309,8 @@ function Rpg(x, y, angle, power, name, guid, type) {
 
 function Particle(x, y, life, vel) {
   this.pos = createVector(x, y);
-  if (vel) {
-    this.vel = p5.Vector.random2D();
-    this.vel.mult(random(0.5, 4));
-  } else {
-    this.vel = 0;
-  }
+  this.vel = p5.Vector.random2D();
+  this.vel.mult(random(0.5, vel));
   this.life = 255;
   this.update = function() {
     this.pos.add(this.vel);
@@ -377,11 +373,11 @@ function Missile(x, y, angle, name, guid) {
   }
   this.blow = function() {
     for (var i = 0; i < 100; i++) {
-      particles.push(new Particle(this.pos.x, this.pos.y, 15, true));
+      particles.push(new Particle(this.pos.x, this.pos.y, 18, 3));
     }
   }
   this.chechHit = function() {
-    if (dist(players[0].x, players[0].y, this.pos.x, this.pos.y) < 15) {
+    if (dist(players[0].x, players[0].y, this.pos.x, this.pos.y) < 20) {
       let data = {
         name: "sendDeath",
         to: players[1].socketId,
@@ -394,7 +390,7 @@ function Missile(x, y, angle, name, guid) {
       }
       socket.emit('sendDeath', data);
     }
-    if (dist(players[1].x, players[1].y, this.pos.x, this.pos.y) < 15) {
+    if (dist(players[1].x, players[1].y, this.pos.x, this.pos.y) < 20) {
       let data = {
         name: "sendDeath",
         to: players[1].socketId,
@@ -424,6 +420,8 @@ function generateTerrain(size, width, maxHeight, smoothness, setyoff) {
   terrain[round(terrain.length / 2) - 1] = 0;
   terrain[round(terrain.length / 2) - 2] += 30;
   terrain[round(terrain.length / 2) + 1] += 30;
+  terrain[0] = terrain[1] - 15;
+  terrain[terrain.length - 1] = terrain[terrain.length - 2] - 15;
 }
 
 function checkForDuplicatePlayers(array) {
@@ -602,12 +600,15 @@ function mouseMoved() {
 function reset() {
   terrainLoadingdone = false;
   clearTimeout(id1);
-  //clearTimeout(id2);
+  clearTimeout(id2);
   airBurstFire = false;
   missileFire = false;
   setTimeout(function() {
     resetPlayersPos();
     airBurstFire = true;
+    missiles = [];
+    missileFire = true;
+    controllingMissile = false;
     stage = 1;
     counter3 = 0;
     counter2 = true;
@@ -686,10 +687,11 @@ function moving() {
   if (keyIsDown(LEFT_ARROW)) {
     for (var i = 0; i < missiles.length; i++) {
       if (missiles[i].name == players[0].name) {
-        missiles[i].angle -= 0.05;
+        //missiles[i].angle -= 0.05;
         let data = {
+          from: players[0].socketId,
           to: players[1].socketId,
-          angle: missiles[i].angle,
+          angle: -0.05,
           guid: missiles[i].guid,
         }
         socket.emit('sendUpdateMissile', data);
@@ -699,10 +701,11 @@ function moving() {
   if (keyIsDown(RIGHT_ARROW)) {
     for (var i = 0; i < missiles.length; i++) {
       if (missiles[i].name == players[0].name) {
-        missiles[i].angle += 0.05;
+        //missiles[i].angle += 0.05;
         let data = {
+          from: players[0].socketId,
           to: players[1].socketId,
-          angle: missiles[i].angle,
+          angle: 0.05,
           guid: missiles[i].guid,
         }
         socket.emit('sendUpdateMissile', data);
@@ -865,14 +868,18 @@ function updateMissiles() {
       if (missiles[i].life < 1 || missiles[i].dead) {
         controllingMissile = false;
         missiles[i].blow();
+        if (missiles[i].name == players[0].name) {
+          reloadMissile();
+        }
         missiles.splice(i, 1);
-        reloadMissile();
         break;
       }
       if (missiles[i].pos.x < 0 || missiles[i].pos.x > screenWidth) {
         controllingMissile = false;
+        if (missiles[i].name == players[0].name) {
+          reloadMissile();
+        }
         missiles.splice(i, 1);
-        reloadMissile();
         break;
       }
       for (let x = 0; x < terrain.length; x++) {
@@ -886,8 +893,10 @@ function updateMissiles() {
               missiles[i].chechHit();
             }
             controllingMissile = false;
+            if (missiles[i].name == players[0].name) {
+              reloadMissile();
+            }
             missiles.splice(i, 1);
-            reloadMissile();
             break;
           }
         }
@@ -957,9 +966,7 @@ function updateRpgs() {
       }
       if (rpgs[i].type == "airburst" && rpgs[i].name == players[0].name && rpgs[i].dead == false) {
         for (var k = 0; k < missiles.length; k++) {
-          console.log("ran2");
           if (dist(rpgs[i].pos.x, rpgs[i].pos.y, missiles[k].pos.x, missiles[k].pos.y) < 25) {
-            console.log("ran3");
             let guid = missiles[k].guid;
             let guid2 = rpgs[i].guid;
             let x = rpgs[i].pos.x;
@@ -1073,7 +1080,7 @@ function updateTerrain(data) {
 function updateMissileAngle(data) {
   for (var i = 0; i < missiles.length; i++) {
     if (missiles[i].guid == data.guid) {
-      missiles[i].angle = data.angle;
+      missiles[i].angle += data.angle;
     }
   }
 }

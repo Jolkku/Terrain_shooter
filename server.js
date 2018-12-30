@@ -81,7 +81,6 @@ function newConnection(socket) {
 
   socket.on('sentMyself',
     function(myData) {
-      console.log('receivedSentmyself ' + myData);
       let data = {
         x: 0,
         y: 0,
@@ -113,7 +112,7 @@ function newConnection(socket) {
 
   socket.on('sendUpdateMissile',
     function(data) {
-      io.to(`${data.to}`).emit('updateMissile', data);
+      io.to(`${data.from}`).to(`${data.to}`).emit('updateMissile', data);
     }
   );
 
